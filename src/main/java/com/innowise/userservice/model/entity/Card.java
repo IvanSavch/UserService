@@ -1,5 +1,6 @@
 package com.innowise.userservice.model.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,7 +13,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "payment_card")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,6 +26,15 @@ public class Card extends Auditable {
     private String holder;
     private LocalDateTime expirationDate;
     private boolean active;
-    @ManyToOne
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private User user;
+
+    public Card(String number, String holder, LocalDateTime expirationDate, boolean active, User user) {
+        this.number = number;
+        this.holder = holder;
+        this.expirationDate = expirationDate;
+        this.active = active;
+        this.user = user;
+    }
 }
