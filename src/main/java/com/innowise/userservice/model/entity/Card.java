@@ -27,7 +27,7 @@ public class Card extends Auditable {
     private LocalDateTime expirationDate;
     private boolean active;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne()
     private User user;
 
     public Card(String number, String holder, LocalDateTime expirationDate, boolean active, User user) {
