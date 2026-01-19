@@ -1,7 +1,7 @@
 package com.innowise.userservice.mapper;
 
-import com.innowise.userservice.model.dto.CardCreateDto;
-import com.innowise.userservice.model.dto.CardUpdateDto;
+import com.innowise.userservice.model.dto.card.CardCreateDto;
+import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import org.mapstruct.Mapper;
 

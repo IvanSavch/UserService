@@ -2,17 +2,17 @@ package com.innowise.userservice.service;
 
 
 import com.innowise.userservice.mapper.UserMapper;
-import com.innowise.userservice.model.dto.UserCreateDto;
-import com.innowise.userservice.model.dto.UserUpdateDto;
+import com.innowise.userservice.model.dto.user.UserCreateDto;
+import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,13 +41,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllUser(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public List<User> findAllUser(Pageable pageable) {
+        return userRepository.findAll(pageable).getContent();
     }
 
     @Override
-    public void updateById(UserUpdateDto userUpdateDto) {
+    public void updateById(Long id,UserUpdateDto userUpdateDto) {
         User user = userMapper.toUser(userUpdateDto);
+        user.setId(id);
         userRepository.save(user);
     }
 

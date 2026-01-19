@@ -1,8 +1,8 @@
 package com.innowise.userservice.service;
 
 import com.innowise.userservice.exception.LimitCardException;
-import com.innowise.userservice.model.dto.CardCreateDto;
-import com.innowise.userservice.model.dto.CardUpdateDto;
+import com.innowise.userservice.model.dto.card.CardCreateDto;
+import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

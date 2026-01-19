@@ -2,8 +2,8 @@ package com.innowise.userservice.service;
 
 import com.innowise.userservice.exception.LimitCardException;
 import com.innowise.userservice.mapper.CardMapper;
-import com.innowise.userservice.model.dto.CardCreateDto;
-import com.innowise.userservice.model.dto.CardUpdateDto;
+import com.innowise.userservice.model.dto.card.CardCreateDto;
+import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;

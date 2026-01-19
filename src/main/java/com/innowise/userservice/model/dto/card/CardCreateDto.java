@@ -1,4 +1,4 @@
-package com.innowise.userservice.model.dto;
+package com.innowise.userservice.model.dto.card;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,4 +1,4 @@
-package com.innowise.userservice.model.dto;
+package com.innowise.userservice.model.dto.card;
 
 import com.innowise.userservice.model.entity.User;
 import jakarta.persistence.ManyToOne;
