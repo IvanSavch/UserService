@@ -5,27 +5,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-public class CardCreateDto {
-    @NotNull(message = "Number can't be null")
-    @NotBlank(message = "Number can't be empty")
-    @Size(max = 16)
-    private String number;
-    @NotNull(message = "Holder can't be null")
-    @NotBlank(message = "Holder can't be null")
-    private String holder;
-    @NotNull(message = "Expiration date can't be null")
-    @NotBlank(message = "Expiration date can't be null")
-    private LocalDateTime expirationDate;
-    private boolean active;
+public class CardCreateDto extends BaseCardDto {
     @NotNull(message = "User id can't be null")
-    @NotBlank(message = "User id can't be null")
     private Long userId;
-
 }

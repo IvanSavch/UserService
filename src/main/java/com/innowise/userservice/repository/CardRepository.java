@@ -4,6 +4,7 @@ import com.innowise.userservice.model.entity.Card;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +18,11 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     int countAllByUserId(Long id);
     Page<Card> findAll(Pageable pageable);
     @Query(nativeQuery = true, value = "UPDATE payment_card set active = true where id=?1")
-    boolean activateCardById(Long id);
+    @Modifying
+    void activateCardById(Long id);
     @Query(nativeQuery = true, value = "UPDATE payment_card set active = false where id=?1")
-    boolean deactivateCardById(Long id);
+    @Modifying
+    void deactivateCardById(Long id);
+    @Query(nativeQuery = true,value = "SELECT number from payment_card where number = ?1")
+    String findCardNumber(String number);
 }

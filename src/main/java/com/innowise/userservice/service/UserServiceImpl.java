@@ -1,6 +1,8 @@
 package com.innowise.userservice.service;
 
 
+import com.innowise.userservice.exception.DuplicateEmailException;
+import com.innowise.userservice.exception.UserNotFound;
 import com.innowise.userservice.mapper.UserMapper;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
@@ -11,33 +13,31 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
-
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
     }
-
 
     @Override
     @Transactional
     public void create(UserCreateDto userCreateDto) {
-        User user = userMapper.toUser(userCreateDto);
+        if (userRepository.findEmail(userCreateDto.getEmail()) != null) {
+            throw new DuplicateEmailException();
+        }
+        User user = UserMapper.INSTANCE.toUser(userCreateDto);
         userRepository.save(user);
     }
 
     @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(UserNotFound::new);
     }
 
     @Override
@@ -46,25 +46,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateById(Long id,UserUpdateDto userUpdateDto) {
-        User user = userMapper.toUser(userUpdateDto);
+    public void updateById(Long id, UserUpdateDto userUpdateDto) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
+
+        if (!user.getEmail().equals(userUpdateDto.getEmail())) {
+            if (userRepository.findEmail(userUpdateDto.getEmail()) != null) {
+                throw new DuplicateEmailException();
+            }
+        }
+
+         user = UserMapper.INSTANCE.toUser(userUpdateDto);
         user.setId(id);
+
         userRepository.save(user);
     }
 
     @Override
-    public boolean activateUserById(Long id) {
-        return userRepository.activateUserById(id);
+    @Transactional
+    public void activateUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
+        userRepository.activateUserById(user.getId());
     }
 
     @Override
-    public boolean deactivateUserById(Long id) {
-        return userRepository.deactivateUserById(id);
+    @Transactional
+    public void deactivateUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
+        userRepository.deactivateUserById(user.getId());
     }
 
     @Override
     @Transactional
     public void deleteUser(User user) {
+        if (user == null) {
+            throw new UserNotFound();
+        }
         userRepository.delete(user);
     }
 }

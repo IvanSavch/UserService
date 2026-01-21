@@ -26,43 +26,31 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
-public class UserController {
+public class UserController  {
 
     private final UserServiceImpl userService;
-    private final UserMapper userMapper;
 
     @Autowired
-    public UserController(UserServiceImpl userService, UserMapper userMapper) {
+    public UserController(UserServiceImpl userService) {
         this.userService = userService;
-        this.userMapper = userMapper;
+
     }
 
-    private ResponseEntity<?> checkValid(BindingResult bindingResult) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-    }
-
-    @PostMapping("/create")
+    @PostMapping("/")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateDto userCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return checkValid(bindingResult);
         }
-        userService.create(userCreateDto);
+      userService.create(userCreateDto);
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid UserUpdateDto userUpdateDto, BindingResult bindingResult) {
-        if (userService.findById(id).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id,  @Valid @RequestBody UserUpdateDto userUpdateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return checkValid(bindingResult);
         }
@@ -71,51 +59,46 @@ public class UserController {
     }
 
 
-    @GetMapping("/find/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable Long id) {
-        Optional<User> user = userService.findById(id);
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        UserResponseDto userResponseDto = userMapper.toUserResponseDto(user.get());
+        User user = userService.findById(id);
+        UserResponseDto userResponseDto = UserMapper.INSTANCE.toUserResponseDto(user);
         return ResponseEntity.ok(userResponseDto);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/")
     public ResponseEntity<List<UserResponseDto>> getAllUser(@RequestParam(required = false, defaultValue = "0") int page) {
         List<User> userList = userService.findAllUser(PageRequest.of(page, 20));
         if (userList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        List<UserResponseDto> listUserResponseDto = userMapper.ToUserResponseDtoList(userList);
+        List<UserResponseDto> listUserResponseDto = UserMapper.INSTANCE.toUserResponseDtoList(userList);
         return ResponseEntity.ok(listUserResponseDto);
     }
 
     @PutMapping("/activate/{id}")
     public ResponseEntity<?> activateUser(@PathVariable Long id) {
-        if (userService.findById(id).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         userService.activateUserById(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/deactivate/{id}")
     public ResponseEntity<?> deactivateUser(@PathVariable Long id) {
-        if (userService.findById(id).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         userService.deactivateUserById(id);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        Optional<User> user = userService.findById(id);
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        userService.deleteUser(user.get());
+        User user = userService.findById(id);
+        userService.deleteUser(user);
         return ResponseEntity.ok().build();
+    }
+    private ResponseEntity<?> checkValid(BindingResult bindingResult) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError fieldError : bindingResult.getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 }

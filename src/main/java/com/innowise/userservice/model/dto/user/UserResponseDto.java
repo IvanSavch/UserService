@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class UserResponseDto extends BaseUserDto {
     private Long id;
 
-
 }

@@ -1,0 +1,26 @@
+package com.innowise.userservice.model.dto.card;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class BaseCardDto {
+    @NotNull(message = "Number can't be null")
+    @NotBlank(message = "Number can't be empty")
+    @Size(max = 16)
+    private String number;
+    @NotNull(message = "Holder can't be null")
+    @NotBlank(message = "Holder can't be null")
+    private String holder;
+    @NotNull(message = "Expiration date can't be null")
+    private LocalDateTime expirationDate;
+    private boolean active;
+   
+}

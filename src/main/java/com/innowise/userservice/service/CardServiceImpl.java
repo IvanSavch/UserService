@@ -1,65 +1,73 @@
 package com.innowise.userservice.service;
 
 import com.innowise.userservice.exception.LimitCardException;
+import com.innowise.userservice.exception.DuplicateCardNumber;
+import com.innowise.userservice.exception.UserNotFound;
 import com.innowise.userservice.mapper.CardMapper;
 import com.innowise.userservice.model.dto.card.CardCreateDto;
 import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
 public class CardServiceImpl implements CardService {
     private final CardRepository cardRepository;
-    private final CardMapper cardMapper;
     private final UserService userService;
 
     @Autowired
-    public CardServiceImpl(CardRepository cardRepository, CardMapper cardMapper, UserService userService) {
+    public CardServiceImpl(CardRepository cardRepository, UserService userService) {
         this.cardRepository = cardRepository;
-        this.cardMapper = cardMapper;
         this.userService = userService;
     }
 
 
     @Override
     @Transactional
-    public void create(Long userId, CardCreateDto cardCreateDto) throws LimitCardException {
-        User user = userService.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+    public void create(Long userId, CardCreateDto cardCreateDto) {
+        User user = userService.findById(userId);
         if (cardRepository.countAllByUserId(user.getId()) >= 5) {
-            throw new LimitCardException("User can't have more than 5 cards");
+            throw new LimitCardException();
         }
-
-        Card card = cardMapper.toCard(cardCreateDto);
+        if (cardRepository.findCardNumber(cardCreateDto.getNumber()) != null) {
+            throw new DuplicateCardNumber();
+        }
+        Card card = CardMapper.INSTANCE.toCard(cardCreateDto);
         card.setUser(user);
         cardRepository.save(card);
+
     }
 
     @Override
-    public Optional<Card> findById(Long id) {
-        return cardRepository.findById(id);
+    public Card findById(Long id) {
+        return cardRepository.findById(id).orElseThrow(UserNotFound::new);
     }
 
     @Override
-    public Page<Card> findAllCard(Pageable pageable) {
-        return cardRepository.findAll(pageable);
+    public List<Card> findAllCard(Pageable pageable) {
+        return cardRepository.findAll(pageable).getContent();
     }
-
     @Override
-    public void updateById(CardUpdateDto cardUpdateDto) {
-        Card card = cardMapper.toCard(cardUpdateDto);
-        User user = userService.findById(cardUpdateDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    public void updateById(Long id, CardUpdateDto cardUpdateDto) {
+        Card card = cardRepository.findById(id).orElseThrow(UserNotFound::new);
+        if (!card.getNumber().equals(cardUpdateDto.getNumber())
+                && cardRepository.findCardNumber(cardUpdateDto.getNumber()) != null){
+                throw new DuplicateCardNumber();
+            }
+        User user = userService.findById(cardUpdateDto.getUserId());
+        if (user == null){
+            throw new UserNotFound();
+        }
+
+        card = CardMapper.INSTANCE.toCard(cardUpdateDto);
+        card.setId(id);
         card.setUser(user);
         cardRepository.save(card);
     }
@@ -70,13 +78,17 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public boolean activateCard(Long id) {
-        return cardRepository.activateCardById(id);
+    @Transactional
+    public void activateCardById(Long id) {
+        cardRepository.findById(id).orElseThrow(UserNotFound::new);
+        cardRepository.activateCardById(id);
     }
 
     @Override
-    public boolean deactivateCardById(Long id) {
-        return cardRepository.deactivateCardById(id);
+    @Transactional
+    public void deactivateCardById(Long id) {
+        Card card = cardRepository.findById(id).orElseThrow(UserNotFound::new);
+        cardRepository.deactivateCardById(card.getId());
     }
 
     @Override
