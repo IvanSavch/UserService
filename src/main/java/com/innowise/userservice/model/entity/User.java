@@ -1,5 +1,6 @@
 package com.innowise.userservice.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +35,7 @@ public class User extends Auditable{
     private boolean active;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
+    @JsonManagedReference
     private List<Card> cardList;
 
     public User(String name, String surname, LocalDate birthDate, String email, boolean active) {

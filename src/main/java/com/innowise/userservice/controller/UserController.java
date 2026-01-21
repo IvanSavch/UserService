@@ -29,7 +29,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
-public class UserController  {
+public class UserController {
 
     private final UserServiceImpl userService;
 
@@ -44,18 +44,17 @@ public class UserController  {
         if (bindingResult.hasErrors()) {
             return checkValid(bindingResult);
         }
-      userService.create(userCreateDto);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        User user = userService.create(userCreateDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id,  @Valid @RequestBody UserUpdateDto userUpdateDto, BindingResult bindingResult) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDto userUpdateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return checkValid(bindingResult);
         }
-        userService.updateById(id, userUpdateDto);
-        return ResponseEntity.ok().build();
+        User user = userService.updateById(id, userUpdateDto);
+        return ResponseEntity.ok().body(user);
     }
 
 
@@ -94,6 +93,7 @@ public class UserController  {
         userService.deleteUser(user);
         return ResponseEntity.ok().build();
     }
+
     private ResponseEntity<?> checkValid(BindingResult bindingResult) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError fieldError : bindingResult.getFieldErrors()) {

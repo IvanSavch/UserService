@@ -1,5 +1,6 @@
 package com.innowise.userservice.controller;
 
+import com.innowise.userservice.exception.CardNotFound;
 import com.innowise.userservice.exception.LimitCardException;
 import com.innowise.userservice.exception.DuplicateEmailException;
 import com.innowise.userservice.exception.DuplicateCardNumber;
@@ -39,6 +40,13 @@ public class ErrorController {
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFound userNotFound){
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTitle(userNotFound.getMessage());
+        errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    @ExceptionHandler(CardNotFound.class)
+    public ResponseEntity<ErrorResponse> handleCardNotFound(CardNotFound cardNotFound){
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTitle(cardNotFound.getMessage());
         errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }

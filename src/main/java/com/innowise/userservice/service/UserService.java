@@ -9,13 +9,13 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface UserService {
-    void create(UserCreateDto userCreateDto) throws DuplicateEmailException;
+    User create(UserCreateDto userCreateDto);
 
     User findById(Long id);
 
     List<User> findAllUser(Pageable pageable);
 
-    void updateById(Long id,UserUpdateDto userUpdateDto);
+    User updateById(Long id,UserUpdateDto userUpdateDto);
 
     void activateUserById(Long id);
 

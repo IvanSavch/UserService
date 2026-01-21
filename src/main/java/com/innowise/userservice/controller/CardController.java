@@ -42,8 +42,8 @@ public class CardController {
         if (bindingResult.hasErrors()) {
             return checkValid(bindingResult);
         }
-        cardService.create(createDto.getUserId(), createDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        Card card = cardService.create(createDto.getUserId(), createDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(card);
     }
 
     @PutMapping("/{id}")
@@ -51,8 +51,8 @@ public class CardController {
         if (bindingResult.hasErrors()) {
             return checkValid(bindingResult);
         }
-        cardService.updateById(id, cardUpdateDto);
-        return ResponseEntity.ok().build();
+        Card card = cardService.updateById(id, cardUpdateDto);
+        return ResponseEntity.ok().body(card);
     }
 
     @GetMapping("/{id}")

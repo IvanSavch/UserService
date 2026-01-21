@@ -1,5 +1,6 @@
 package com.innowise.userservice.service;
 
+import com.innowise.userservice.exception.CardNotFound;
 import com.innowise.userservice.exception.LimitCardException;
 import com.innowise.userservice.exception.DuplicateCardNumber;
 import com.innowise.userservice.exception.UserNotFound;
@@ -11,27 +12,30 @@ import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
-@Transactional
 public class CardServiceImpl implements CardService {
     private final CardRepository cardRepository;
     private final UserService userService;
-
+    private final RedisTemplate<String,Card> cardRedisTemplate;
+    private static final String CACHE_KEY_PREFIX = "card:";
+    private static final long CACHE_TTL_MINUTES = 1;
     @Autowired
-    public CardServiceImpl(CardRepository cardRepository, UserService userService) {
+    public CardServiceImpl(CardRepository cardRepository, UserService userService,RedisTemplate<String,Card> cardRedisTemplate) {
         this.cardRepository = cardRepository;
         this.userService = userService;
+        this.cardRedisTemplate = cardRedisTemplate;
     }
 
 
     @Override
-    @Transactional
-    public void create(Long userId, CardCreateDto cardCreateDto) {
+    public Card create(Long userId, CardCreateDto cardCreateDto) {
         User user = userService.findById(userId);
         if (cardRepository.countAllByUserId(user.getId()) >= 5) {
             throw new LimitCardException();
@@ -41,13 +45,20 @@ public class CardServiceImpl implements CardService {
         }
         Card card = CardMapper.INSTANCE.toCard(cardCreateDto);
         card.setUser(user);
-        cardRepository.save(card);
+        return cardRepository.save(card);
 
     }
 
     @Override
     public Card findById(Long id) {
-        return cardRepository.findById(id).orElseThrow(UserNotFound::new);
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        Card card = cardRedisTemplate.opsForValue().get(cacheKey);
+        if (card != null){
+            return card;
+        }
+        Card cardFromDB = cardRepository.findById(id).orElseThrow(CardNotFound::new);
+        cardRedisTemplate.opsForValue().set(cacheKey,cardFromDB,CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+        return cardFromDB;
     }
 
     @Override
@@ -55,8 +66,9 @@ public class CardServiceImpl implements CardService {
         return cardRepository.findAll(pageable).getContent();
     }
     @Override
-    public void updateById(Long id, CardUpdateDto cardUpdateDto) {
-        Card card = cardRepository.findById(id).orElseThrow(UserNotFound::new);
+    @Transactional
+    public Card updateById(Long id, CardUpdateDto cardUpdateDto) {
+        Card card = cardRepository.findById(id).orElseThrow(CardNotFound::new);
         if (!card.getNumber().equals(cardUpdateDto.getNumber())
                 && cardRepository.findCardNumber(cardUpdateDto.getNumber()) != null){
                 throw new DuplicateCardNumber();
@@ -65,11 +77,12 @@ public class CardServiceImpl implements CardService {
         if (user == null){
             throw new UserNotFound();
         }
-
         card = CardMapper.INSTANCE.toCard(cardUpdateDto);
         card.setId(id);
         card.setUser(user);
-        cardRepository.save(card);
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        cardRedisTemplate.delete(cacheKey);
+        return cardRepository.save(card);
     }
 
     @Override
@@ -80,20 +93,26 @@ public class CardServiceImpl implements CardService {
     @Override
     @Transactional
     public void activateCardById(Long id) {
-        cardRepository.findById(id).orElseThrow(UserNotFound::new);
+        cardRepository.findById(id).orElseThrow(CardNotFound::new);
         cardRepository.activateCardById(id);
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        cardRedisTemplate.delete(cacheKey);
     }
 
     @Override
     @Transactional
     public void deactivateCardById(Long id) {
-        Card card = cardRepository.findById(id).orElseThrow(UserNotFound::new);
+        Card card = cardRepository.findById(id).orElseThrow(CardNotFound::new);
         cardRepository.deactivateCardById(card.getId());
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        cardRedisTemplate.delete(cacheKey);
     }
 
     @Override
     @Transactional
     public void deleteUser(Card card) {
         cardRepository.delete(card);
+        String cacheKey = CACHE_KEY_PREFIX + card.getId();
+        cardRedisTemplate.delete(cacheKey);
     }
 }

@@ -1,6 +1,6 @@
 package com.innowise.userservice.model.entity;
 
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,6 +28,7 @@ public class Card extends Auditable {
     private boolean active;
 
     @ManyToOne()
+    @JsonBackReference
     private User user;
 
     public Card(String number, String holder, LocalDateTime expirationDate, boolean active, User user) {

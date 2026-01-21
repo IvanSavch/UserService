@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CardService {
-    void create(Long userId, CardCreateDto cardCreateDto) throws LimitCardException;
+    Card create(Long userId, CardCreateDto cardCreateDto) throws LimitCardException;
     Card findById(Long id);
 
     List<Card> findAllCard(Pageable pageable);
 
-    void updateById(Long id,CardUpdateDto cardUpdateDto);
+    Card updateById(Long id,CardUpdateDto cardUpdateDto);
 
     List<Card> findAllCardByUserId(Long userId);
 

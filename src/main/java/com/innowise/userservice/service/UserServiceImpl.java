@@ -8,36 +8,52 @@ import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final RedisTemplate<String, User> userRedisTemplate;
+    private static final String CACHE_KEY_PREFIX = "user:";
+    private static final long CACHE_TTL_MINUTES = 1;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, RedisTemplate<String, User> userRedisTemplate) {
         this.userRepository = userRepository;
+        this.userRedisTemplate = userRedisTemplate;
     }
 
     @Override
-    @Transactional
-    public void create(UserCreateDto userCreateDto) {
+    public User create(UserCreateDto userCreateDto) {
         if (userRepository.findEmail(userCreateDto.getEmail()) != null) {
             throw new DuplicateEmailException();
         }
         User user = UserMapper.INSTANCE.toUser(userCreateDto);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(UserNotFound::new);
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        User userFromCache = userRedisTemplate.opsForValue().get(cacheKey);
+        if (userFromCache != null) {
+            log.info("User found in cache: id={}",id);
+            return userFromCache;
+        }
+        log.info("User not found in cache: id={}",id);
+        User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
+        userRedisTemplate.opsForValue().set(cacheKey,user,CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+        return user;
     }
 
     @Override
@@ -46,25 +62,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateById(Long id, UserUpdateDto userUpdateDto) {
-        User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
+    @Transactional
+    public User updateById(Long id, UserUpdateDto userUpdateDto) {
+        User userOnDB = userRepository.findById(id).orElseThrow(UserNotFound::new);
 
-        if (!user.getEmail().equals(userUpdateDto.getEmail())) {
+        if (!userOnDB.getEmail().equals(userUpdateDto.getEmail())) {
             if (userRepository.findEmail(userUpdateDto.getEmail()) != null) {
                 throw new DuplicateEmailException();
             }
         }
+        userOnDB = UserMapper.INSTANCE.toUser(userUpdateDto);
+        userOnDB.setId(id);
 
-         user = UserMapper.INSTANCE.toUser(userUpdateDto);
-        user.setId(id);
-
-        userRepository.save(user);
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        userRedisTemplate.delete(cacheKey);
+        log.info("deleted from cache: id={}",id);
+        return userRepository.save(userOnDB);
     }
 
     @Override
     @Transactional
     public void activateUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        userRedisTemplate.delete(cacheKey);
+        log.info("deleted from cache: id={}",id);
         userRepository.activateUserById(user.getId());
     }
 
@@ -72,6 +94,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deactivateUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFound::new);
+        String cacheKey = CACHE_KEY_PREFIX + id;
+        userRedisTemplate.delete(cacheKey);
+        log.info("deleted from cache: id={}",id);
         userRepository.deactivateUserById(user.getId());
     }
 
@@ -81,6 +106,9 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new UserNotFound();
         }
+        String cacheKey = CACHE_KEY_PREFIX + user.getId();
+        userRedisTemplate.delete(cacheKey);
+        log.info("deleted from cache: id={}",user.getId());
         userRepository.delete(user);
     }
 }
