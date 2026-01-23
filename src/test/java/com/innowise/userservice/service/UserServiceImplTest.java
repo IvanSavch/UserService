@@ -53,7 +53,7 @@ class UserServiceImplTest {
         userCreateDto.setName("test");
         userCreateDto.setSurname("Sauchanka");
         userCreateDto.setEmail("test@mail");
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         User user = userService.create(userCreateDto);
         assertNotNull(user);
         assertEquals("test@mail",user.getEmail());
@@ -116,7 +116,7 @@ class UserServiceImplTest {
         userUpdateDto.setEmail("Ivan@mail.com");
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(userRepository.findEmail("Ivan@mail.com")).thenReturn(null);
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         User updateUser = userService.updateById(USER_ID,userUpdateDto);
         assertEquals("Ivan@mail.com",updateUser.getEmail());
         verify(userRedisTemplate).delete("user:1");

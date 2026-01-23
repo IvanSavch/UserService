@@ -64,7 +64,7 @@ class CardServiceImplTest {
         when(userService.findById(USER_ID)).thenReturn(user);
         when(cardRepository.countAllByUserId(user.getId())).thenReturn(0);
         when(cardRepository.findCardNumber("1111")).thenReturn(null);
-        when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(cardRepository.save(any(Card.class))).thenAnswer(i -> i.getArgument(0));
         Card result = cardService.create(dto);
         assertNotNull(result);
         assertEquals("1111", result.getNumber());
@@ -158,7 +158,7 @@ class CardServiceImplTest {
         when(cardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
         when(cardRepository.findCardNumber("2222")).thenReturn(null);
         when(userService.findById(USER_ID)).thenReturn(user);
-        when(cardRepository.save(any(Card.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(cardRepository.save(any(Card.class))).thenAnswer(i -> i.getArgument(0));
         Card updateCard = cardService.updateById(CARD_ID, cardDto);
         assertEquals(CARD_ID, updateCard.getId());
         assertEquals(user, updateCard.getUser());
