@@ -9,5 +9,4 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserCreateDto extends BaseUserDto {
 
-
 }

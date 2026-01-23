@@ -65,7 +65,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateById(Long id, UserUpdateDto userUpdateDto) {
         User userOnDB = userRepository.findById(id).orElseThrow(UserNotFound::new);
-
         if (!userOnDB.getEmail().equals(userUpdateDto.getEmail())) {
             if (userRepository.findEmail(userUpdateDto.getEmail()) != null) {
                 throw new DuplicateEmailException();

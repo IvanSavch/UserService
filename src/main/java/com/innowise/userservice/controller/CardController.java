@@ -42,7 +42,7 @@ public class CardController {
         if (bindingResult.hasErrors()) {
             return checkValid(bindingResult);
         }
-        Card card = cardService.create(createDto.getUserId(), createDto);
+        Card card = cardService.create(createDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(card);
     }
 
