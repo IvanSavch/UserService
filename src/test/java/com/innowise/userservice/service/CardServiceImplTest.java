@@ -13,10 +13,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -108,6 +113,36 @@ class CardServiceImplTest {
         when(cardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
         Card result = cardService.findById(CARD_ID);
         assertEquals(CARD_ID, result.getId());
+    }
+    @Test
+    void findAllCardByUserId() {
+        User user = new User();
+        user.setId(USER_ID);
+        Card card1 = new Card();
+        card1.setId(CARD_ID);
+        card1.setUser(user);
+        Card card2 = new Card();
+        card2.setId(2L);
+        card2.setUser(user);
+        List<Card> cards = List.of(card1, card2);
+        when(cardRepository.findAllByUserId(USER_ID)).thenReturn(cards);
+        List<Card> result = cardService.findAllCardByUserId(USER_ID);
+        assertEquals(2, result.size());
+        verify(cardRepository).findAllByUserId(USER_ID);
+    }
+    @Test
+    void findAll(){
+        Pageable pageable = PageRequest.of(0,2);
+        Card card1 = new Card();
+        card1.setId(CARD_ID);
+        Card card2 = new Card();
+        card2.setId(2L);
+        List<Card> cards = List.of(card1, card2);
+        Page<Card> cardPage = new PageImpl<>(cards);
+        when(cardRepository.findAll(pageable)).thenReturn(cardPage);
+        List<Card> result = cardService.findAllCard(pageable);
+        assertEquals(2, result.size());
+        verify(cardRepository).findAll(pageable);
     }
 
     @Test

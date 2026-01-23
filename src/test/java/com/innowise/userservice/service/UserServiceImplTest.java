@@ -12,10 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,6 +78,20 @@ class UserServiceImplTest {
         assertNotNull(user);
         User result = userService.findById(USER_ID);
         assertEquals(user,result);
+    }
+    @Test
+    void findAllUser(){
+        Pageable pageable = PageRequest.of(0,2);
+        User user1 = new User();
+        user1.setId(USER_ID);
+        User user2 = new User();
+        user2.setId(2L);
+        List<User> users = List.of(user1, user2);
+        Page<User> userPage = new PageImpl<>(users);
+        when(userRepository.findAll(pageable)).thenReturn(userPage);
+        List<User> result = userService.findAllUser(pageable);
+        assertEquals(2, result.size());
+        verify(userRepository).findAll(pageable);
     }
     @Test
     void checkExceptionUserNotFound(){
