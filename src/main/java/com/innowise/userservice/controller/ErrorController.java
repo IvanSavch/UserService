@@ -1,10 +1,10 @@
 package com.innowise.userservice.controller;
 
-import com.innowise.userservice.exception.CardNotFound;
+import com.innowise.userservice.exception.CardNotFoundException;
 import com.innowise.userservice.exception.LimitCardException;
 import com.innowise.userservice.exception.DuplicateEmailException;
-import com.innowise.userservice.exception.DuplicateCardNumber;
-import com.innowise.userservice.exception.UserNotFound;
+import com.innowise.userservice.exception.DuplicateCardNumberException;
+import com.innowise.userservice.exception.UserNotFoundException;
 import com.innowise.userservice.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,25 +29,26 @@ public class ErrorController {
         errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
-    @ExceptionHandler(DuplicateCardNumber.class)
-    public ResponseEntity<ErrorResponse> handleNumberAlreadyExists(DuplicateCardNumber duplicateCardNumber){
+    @ExceptionHandler(DuplicateCardNumberException.class)
+    public ResponseEntity<ErrorResponse> handleNumberAlreadyExists(DuplicateCardNumberException duplicateCardNumberException){
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setTitle(duplicateCardNumber.getMessage());
+        errorResponse.setTitle(duplicateCardNumberException.getMessage());
         errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
-    @ExceptionHandler(UserNotFound.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFound userNotFound){
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException userNotFoundException){
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setTitle(userNotFound.getMessage());
+        errorResponse.setTitle(userNotFoundException.getMessage());
         errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
-    @ExceptionHandler(CardNotFound.class)
-    public ResponseEntity<ErrorResponse> handleCardNotFound(CardNotFound cardNotFound){
+    @ExceptionHandler(CardNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCardNotFoundException(CardNotFoundException cardNotFoundException){
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setTitle(cardNotFound.getMessage());
+        errorResponse.setTitle(cardNotFoundException.getMessage());
         errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
 }

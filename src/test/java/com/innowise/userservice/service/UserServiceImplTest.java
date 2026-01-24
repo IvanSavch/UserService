@@ -1,7 +1,7 @@
 package com.innowise.userservice.service;
 
 import com.innowise.userservice.exception.DuplicateEmailException;
-import com.innowise.userservice.exception.UserNotFound;
+import com.innowise.userservice.exception.UserNotFoundException;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
@@ -95,7 +95,7 @@ class UserServiceImplTest {
     }
     @Test
     void checkExceptionUserNotFound(){
-        assertThrows(UserNotFound.class,()->userService.findById(USER_ID));
+        assertThrows(UserNotFoundException.class,()->userService.findById(USER_ID));
     }
     @Test
     void checkExceptionDuplicatedEmail(){

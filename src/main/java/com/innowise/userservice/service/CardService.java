@@ -23,5 +23,5 @@ public interface CardService {
 
     void deactivateCardById(Long id);
 
-    void deleteUser(Card card);
+    void deleteCard(Card card);
 }

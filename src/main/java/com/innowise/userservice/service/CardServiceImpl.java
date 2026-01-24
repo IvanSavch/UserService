@@ -1,9 +1,9 @@
 package com.innowise.userservice.service;
 
-import com.innowise.userservice.exception.CardNotFound;
+import com.innowise.userservice.exception.CardNotFoundException;
 import com.innowise.userservice.exception.LimitCardException;
-import com.innowise.userservice.exception.DuplicateCardNumber;
-import com.innowise.userservice.exception.UserNotFound;
+import com.innowise.userservice.exception.DuplicateCardNumberException;
+import com.innowise.userservice.exception.UserNotFoundException;
 import com.innowise.userservice.mapper.CardMapper;
 import com.innowise.userservice.model.dto.card.CardCreateDto;
 import com.innowise.userservice.model.dto.card.CardUpdateDto;
@@ -41,7 +41,7 @@ public class CardServiceImpl implements CardService {
             throw new LimitCardException();
         }
         if (cardRepository.findCardNumber(cardCreateDto.getNumber()) != null) {
-            throw new DuplicateCardNumber();
+            throw new DuplicateCardNumberException();
         }
         Card card = CardMapper.INSTANCE.toCard(cardCreateDto);
         card.setUser(user);
@@ -56,7 +56,7 @@ public class CardServiceImpl implements CardService {
         if (card != null){
             return card;
         }
-        Card cardFromDB = cardRepository.findById(id).orElseThrow(CardNotFound::new);
+        Card cardFromDB = cardRepository.findById(id).orElseThrow(CardNotFoundException::new);
         cardRedisTemplate.opsForValue().set(cacheKey,cardFromDB,CACHE_TTL_MINUTES, TimeUnit.MINUTES);
         return cardFromDB;
     }
@@ -68,14 +68,14 @@ public class CardServiceImpl implements CardService {
     @Override
     @Transactional
     public Card updateById(Long id, CardUpdateDto cardUpdateDto) {
-        Card card = cardRepository.findById(id).orElseThrow(CardNotFound::new);
+        Card card = cardRepository.findById(id).orElseThrow(CardNotFoundException::new);
         if (!card.getNumber().equals(cardUpdateDto.getNumber())
                 && cardRepository.findCardNumber(cardUpdateDto.getNumber()) != null){
-                throw new DuplicateCardNumber();
+                throw new DuplicateCardNumberException();
             }
         User user = userService.findById(cardUpdateDto.getUserId());
         if (user == null){
-            throw new UserNotFound();
+            throw new UserNotFoundException();
         }
         card = CardMapper.INSTANCE.toCard(cardUpdateDto);
         card.setId(id);
@@ -93,7 +93,7 @@ public class CardServiceImpl implements CardService {
     @Override
     @Transactional
     public void activateCardById(Long id) {
-        cardRepository.findById(id).orElseThrow(CardNotFound::new);
+        cardRepository.findById(id).orElseThrow(CardNotFoundException::new);
         cardRepository.activateCardById(id);
         String cacheKey = CACHE_KEY_PREFIX + id;
         cardRedisTemplate.delete(cacheKey);
@@ -102,7 +102,7 @@ public class CardServiceImpl implements CardService {
     @Override
     @Transactional
     public void deactivateCardById(Long id) {
-        Card card = cardRepository.findById(id).orElseThrow(CardNotFound::new);
+        Card card = cardRepository.findById(id).orElseThrow(CardNotFoundException::new);
         cardRepository.deactivateCardById(card.getId());
         String cacheKey = CACHE_KEY_PREFIX + id;
         cardRedisTemplate.delete(cacheKey);
@@ -110,7 +110,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
-    public void deleteUser(Card card) {
+    public void deleteCard(Card card) {
         cardRepository.delete(card);
         String cacheKey = CACHE_KEY_PREFIX + card.getId();
         cardRedisTemplate.delete(cacheKey);

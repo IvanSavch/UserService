@@ -1,14 +1,14 @@
 package com.innowise.userservice.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 public class RedisConfiguration {
@@ -17,7 +17,7 @@ public class RedisConfiguration {
         RedisTemplate<String, User> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        JacksonJsonRedisSerializer<User> userJacksonJsonRedisSerializer = new JacksonJsonRedisSerializer<>(objectMapper, User.class);
+        Jackson2JsonRedisSerializer<User> userJacksonJsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, User.class);
         redisTemplate.setValueSerializer(userJacksonJsonRedisSerializer);
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
@@ -28,7 +28,7 @@ public class RedisConfiguration {
         RedisTemplate<String, Card> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        JacksonJsonRedisSerializer<Card> userJacksonJsonRedisSerializer = new JacksonJsonRedisSerializer<>(objectMapper, Card.class);
+        Jackson2JsonRedisSerializer<Card> userJacksonJsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, Card.class);
         redisTemplate.setValueSerializer(userJacksonJsonRedisSerializer);
         redisTemplate.afterPropertiesSet();
         return redisTemplate;

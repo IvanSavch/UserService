@@ -1,8 +1,8 @@
 package com.innowise.userservice.exception;
 
-public class DuplicateCardNumber extends RuntimeException {
+public class DuplicateCardNumberException extends RuntimeException {
     private static final String message = "This card already exist";
-    public DuplicateCardNumber() {
+    public DuplicateCardNumberException() {
         super(message);
     }
 }

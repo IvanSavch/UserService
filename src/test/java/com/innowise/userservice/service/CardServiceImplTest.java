@@ -1,6 +1,6 @@
 package com.innowise.userservice.service;
 
-import com.innowise.userservice.exception.DuplicateCardNumber;
+import com.innowise.userservice.exception.DuplicateCardNumberException;
 import com.innowise.userservice.exception.LimitCardException;
 import com.innowise.userservice.model.dto.card.CardCreateDto;
 import com.innowise.userservice.model.dto.card.CardUpdateDto;
@@ -92,8 +92,9 @@ class CardServiceImplTest {
         dto.setUserId(USER_ID);
         when(userService.findById(USER_ID)).thenReturn(user);
         when(cardRepository.findCardNumber("1111")).thenReturn("1111");
-        assertThrows(DuplicateCardNumber.class, ()-> cardService.create(dto));
+        assertThrows(DuplicateCardNumberException.class, ()-> cardService.create(dto));
     }
+
 
     @Test
     void findByIdFromCache() {
@@ -187,10 +188,10 @@ class CardServiceImplTest {
     }
 
     @Test
-    void deleteUser() {
+    void deleteCard() {
         Card card = new Card();
         card.setId(CARD_ID);
-        cardService.deleteUser(card);
+        cardService.deleteCard(card);
         verify(cardRepository).delete(card);
         verify(cardRedisTemplate).delete("card:1");
 

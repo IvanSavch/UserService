@@ -1,6 +1,5 @@
 package com.innowise.userservice.service;
 
-import com.innowise.userservice.exception.DuplicateEmailException;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
@@ -15,7 +14,7 @@ public interface UserService {
 
     List<User> findAllUser(Pageable pageable);
 
-    User updateById(Long id,UserUpdateDto userUpdateDto);
+    User updateById(Long id, UserUpdateDto userUpdateDto);
 
     void activateUserById(Long id);
 

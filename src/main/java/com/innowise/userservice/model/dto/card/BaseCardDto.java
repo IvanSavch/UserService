@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class BaseCardDto {
     @NotNull(message = "Number can't be null")
     @NotBlank(message = "Number can't be empty")
-    @Size(max = 16)
+    @Size(min = 16,message = "Size must be 16")
     private String number;
     @NotNull(message = "Holder can't be null")
     @NotBlank(message = "Holder can't be null")

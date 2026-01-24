@@ -99,9 +99,9 @@ public class CardController {
         return ResponseEntity.ok().build();
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteCard(@PathVariable Long id) {
         Card user = cardService.findById(id);
-        cardService.deleteUser(user);
+        cardService.deleteCard(user);
         return ResponseEntity.ok().build();
     }
 
