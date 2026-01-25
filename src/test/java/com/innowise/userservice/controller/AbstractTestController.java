@@ -52,6 +52,7 @@ public abstract class AbstractTestController {
     }
     @DynamicPropertySource
     static void postgresProperties(DynamicPropertyRegistry registry) {
+        log.info("Postgres JDBC URL: {}", postgres.getJdbcUrl());
         registry.add("spring.datasource.url", () -> postgres.getJdbcUrl());
         registry.add("spring.datasource.username", () -> postgres.getUsername());
         registry.add("spring.datasource.password", () -> postgres.getPassword());
