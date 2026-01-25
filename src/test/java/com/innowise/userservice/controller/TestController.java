@@ -6,6 +6,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -17,7 +18,8 @@ public class TestController {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:11.1")
             .withDatabaseName("postgres")
             .withUsername("postgres")
-            .withPassword("root");
+            .withPassword("root")
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1));
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7").withExposedPorts(6379);
     @DynamicPropertySource
