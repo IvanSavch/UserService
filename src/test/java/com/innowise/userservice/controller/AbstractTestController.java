@@ -31,9 +31,10 @@ import org.testcontainers.utility.MountableFile;
                 "spring.datasource.username=",
                 "spring.datasource.password=",
                 "spring.data.redis.host=",
-                "spring.data.redis.port="
-        },
-        locations = "classpath:application-test.properties")
+                "spring.data.redis.port=",
+                "spring.config.import=optional:file:.env[.properties]",
+                "spring.config.use-legacy-processing=true"
+        })
 public abstract class AbstractTestController {
 
     @Autowired
