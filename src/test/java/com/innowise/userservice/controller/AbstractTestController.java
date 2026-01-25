@@ -10,7 +10,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @SpringBootTest
-public class TestController {
+public abstract class AbstractTestController {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:11.1")
             .withDatabaseName("postgres")
