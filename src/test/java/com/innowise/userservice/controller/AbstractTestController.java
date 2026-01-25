@@ -41,7 +41,7 @@ public abstract class AbstractTestController {
             .withDatabaseName("testDB")
             .withUsername("postgres")
             .withPassword("root")
-            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1));
+            .waitingFor(Wait.forListeningPort());
     @Container
     static  GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
     @DynamicPropertySource
