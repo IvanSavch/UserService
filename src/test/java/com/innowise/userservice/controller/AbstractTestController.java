@@ -27,6 +27,7 @@ public abstract class AbstractTestController {
             .withDatabaseName("testDB")
             .withUsername("postgres")
             .withPassword("root")
+            .withReuse(true)
             .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1));
     @Container
     static  GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
@@ -41,11 +42,5 @@ public abstract class AbstractTestController {
         registry.add("spring.datasource.username", () -> postgres.getUsername());
         registry.add("spring.datasource.password", () -> postgres.getPassword());
 
-        registry.add("spring.datasource.hikari.connection-timeout", () -> "30000");
-        registry.add("spring.datasource.hikari.maximum-pool-size", () -> "5");
-        registry.add("spring.datasource.hikari.minimum-idle", () -> "2");
-        registry.add("spring.datasource.hikari.idle-timeout", () -> "30000");
-        registry.add("spring.datasource.hikari.max-lifetime", () -> "60000");
-        registry.add("spring.datasource.hikari.leak-detection-threshold", () -> "60000");
     }
 }
