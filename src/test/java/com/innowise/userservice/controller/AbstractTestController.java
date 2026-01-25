@@ -17,12 +17,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureMockMvc
 public abstract class AbstractTestController {
     @Container
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
+    static  PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("testDB")
             .withUsername("postgres")
             .withPassword("root");
     @Container
-    static final GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
+    static  GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
     @DynamicPropertySource
     static void redisProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.redis.host", redis::getHost);
