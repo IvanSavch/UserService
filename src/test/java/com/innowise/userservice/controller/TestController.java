@@ -12,8 +12,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
 public class TestController {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:11.1")
