@@ -10,6 +10,8 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.Duration;
+
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("test")
@@ -19,7 +21,9 @@ public class TestController {
             .withDatabaseName("postgres")
             .withUsername("postgres")
             .withPassword("root")
-            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1));
+            .waitingFor(
+            Wait.forListeningPort()
+                .withStartupTimeout(Duration.ofMinutes(2)));
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7").withExposedPorts(6379);
     @DynamicPropertySource
