@@ -8,15 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: testDB
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: root
-        ports:
-          - 5432:5432
 
     steps:
       - uses: actions/checkout@v6
