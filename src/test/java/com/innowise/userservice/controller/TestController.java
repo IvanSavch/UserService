@@ -21,7 +21,7 @@ import java.time.Duration;
 @Transactional
 public class TestController {
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("postgres")
             .withUsername("postgres")
             .withPassword("root")
@@ -29,7 +29,7 @@ public class TestController {
             Wait.forListeningPort()
                 .withStartupTimeout(Duration.ofMinutes(2)));
     @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
+    static final GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
     @DynamicPropertySource
     static void redisProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.data.redis.host", redis::getHost);
