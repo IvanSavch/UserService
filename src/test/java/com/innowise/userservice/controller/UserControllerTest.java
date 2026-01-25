@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 @Transactional
-class UserControllerTest extends AbstractTestController {
+class UserControllerTest extends TestController {
     @Autowired
     private MockMvc mockMvc;
 
