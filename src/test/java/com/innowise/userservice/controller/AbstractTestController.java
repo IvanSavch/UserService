@@ -19,7 +19,7 @@ import java.time.Duration;
 public abstract class AbstractTestController {
     @Container
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
-            .withDatabaseName("postgres")
+            .withDatabaseName("testDB")
             .withUsername("postgres")
             .withPassword("root");
     @Container
