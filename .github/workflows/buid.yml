@@ -9,6 +9,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: testdb
+
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+
+        ports:
+          - 6379:6379
+
     steps:
       - uses: actions/checkout@v6
         with:
