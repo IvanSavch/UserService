@@ -55,5 +55,9 @@ public abstract class AbstractTestController {
         registry.add("spring.datasource.username", () -> postgres.getUsername());
         registry.add("spring.datasource.password", () -> postgres.getPassword());
 
+        registry.add("spring.datasource.hikari.maxLifetime", () -> "30000");
+        registry.add("spring.datasource.hikari.connectionTimeout", () -> "10000");
+        registry.add("spring.datasource.hikari.validationTimeout", () -> "3000");
+
     }
 }
