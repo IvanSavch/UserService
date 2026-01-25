@@ -9,13 +9,23 @@ import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
 import com.innowise.userservice.repository.UserRepository;
 import com.jayway.jsonpath.JsonPath;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 
 import java.time.LocalDate;
@@ -29,7 +39,37 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
-class CardControllerTest extends AbstractTestController {
+@Testcontainers
+@SpringBootTest
+@AutoConfigureMockMvc
+@Slf4j
+class CardControllerTest {
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
+            .withDatabaseName("test")
+            .withUsername("test")
+            .withPassword("test")
+            .waitingFor(Wait.forListeningPort());
+    @Container
+    static GenericContainer<?> redis = new GenericContainer<>("redis")
+            .withExposedPorts(6379)
+            .waitingFor(Wait.forListeningPort());;
+    @DynamicPropertySource
+    static void redisProperties(DynamicPropertyRegistry registry) {
+        redis.start();
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
+    }
+    @DynamicPropertySource
+    static void postgresProperties(DynamicPropertyRegistry registry) {
+        postgres.start();
+        registry.add("spring.datasource.url", () -> postgres.getJdbcUrl());
+        registry.add("spring.datasource.username", () -> postgres.getUsername());
+        registry.add("spring.datasource.password", () -> postgres.getPassword());
+
+
+
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,7 +80,7 @@ class CardControllerTest extends AbstractTestController {
     private CardRepository cardRepository;
     @Autowired
     private UserRepository userRepository;
-  
+
     @Test
     void createCard() {
         UserCreateDto userCreateDto = new UserCreateDto();
