@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -24,6 +25,15 @@ import org.testcontainers.utility.MountableFile;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Slf4j
+@TestPropertySource(
+        properties = {
+                "spring.datasource.url=",
+                "spring.datasource.username=",
+                "spring.datasource.password=",
+                "spring.data.redis.host=",
+                "spring.data.redis.port="
+        },
+        locations = "classpath:application-test.properties")
 public abstract class AbstractTestController {
 
     @Autowired
@@ -56,8 +66,7 @@ public abstract class AbstractTestController {
         registry.add("spring.datasource.password", () -> postgres.getPassword());
 
         registry.add("spring.datasource.hikari.maxLifetime", () -> "30000");
-        registry.add("spring.datasource.hikari.connectionTimeout", () -> "10000");
-        registry.add("spring.datasource.hikari.validationTimeout", () -> "3000");
+
 
     }
 }
