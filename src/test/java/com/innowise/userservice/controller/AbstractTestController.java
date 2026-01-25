@@ -7,7 +7,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -22,10 +21,7 @@ public abstract class AbstractTestController {
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("postgres")
             .withUsername("postgres")
-            .withPassword("root")
-            .waitingFor(
-            Wait.forListeningPort()
-                .withStartupTimeout(Duration.ofMinutes(2)));
+            .withPassword("root");
     @Container
     static final GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
     @DynamicPropertySource
@@ -38,9 +34,5 @@ public abstract class AbstractTestController {
         registry.add("spring.datasource.url", () -> postgres.getJdbcUrl());
         registry.add("spring.datasource.username", () -> postgres.getUsername());
         registry.add("spring.datasource.password", () -> postgres.getPassword());
-        registry.add("spring.liquibase.enabled", () -> "true");
-        registry.add("spring.liquibase.change-log", () -> "classpath:db/changelog/db.changelog-master.yaml");
-        registry.add("spring.liquibase.default-schema", () -> "public");
-
     }
 }
