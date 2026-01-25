@@ -5,6 +5,7 @@ import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,6 +38,11 @@ class UserControllerTest extends AbstractTestController {
     private ObjectMapper objectMapper;
     @Autowired
     private UserRepository userRepository;
+
+    @BeforeEach
+    void cleanDb() {
+        userRepository.deleteAll();
+    }
 
     @Test
     void createUser() throws Exception {

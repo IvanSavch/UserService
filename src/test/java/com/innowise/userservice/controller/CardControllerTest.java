@@ -9,10 +9,12 @@ import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
 import com.innowise.userservice.repository.UserRepository;
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
@@ -37,8 +39,14 @@ class CardControllerTest extends AbstractTestController {
     private CardRepository cardRepository;
     @Autowired
     private UserRepository userRepository;
+    @BeforeEach
+    void cleanDb() {
+        cardRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
+    @Transactional
     void createCard() {
         UserCreateDto userCreateDto = new UserCreateDto();
         userCreateDto.setSurname("Sauchanka");
