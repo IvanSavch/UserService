@@ -40,9 +40,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
-            -D sonar.organization=ivansavch 
-            -D sonar.projectKey=IvanSavch_UserService
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.organization=ivansavch \
+            -Dsonar.projectKey=IvanSavch_UserService
 
       - name: Build Docker image
         run: docker build -t user-service .
