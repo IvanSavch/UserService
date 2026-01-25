@@ -1,5 +1,7 @@
 package com.innowise.userservice.controller;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -7,20 +9,25 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Slf4j
 public abstract class AbstractTestController {
     @Container
     static  PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("testDB")
             .withUsername("postgres")
-            .withPassword("root");
+            .withPassword("root")
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1));
     @Container
     static  GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
     @DynamicPropertySource
