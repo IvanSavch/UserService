@@ -25,16 +25,6 @@ import org.testcontainers.utility.MountableFile;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Slf4j
-@TestPropertySource(
-        properties = {
-                "spring.datasource.url=",
-                "spring.datasource.username=",
-                "spring.datasource.password=",
-                "spring.data.redis.host=",
-                "spring.data.redis.port=",
-                "spring.config.import=optional:file:.env[.properties]",
-                "spring.config.use-legacy-processing=true"
-        })
 public abstract class AbstractTestController {
 
     @Autowired
@@ -67,6 +57,8 @@ public abstract class AbstractTestController {
         registry.add("spring.datasource.password", () -> postgres.getPassword());
 
         registry.add("spring.datasource.hikari.maxLifetime", () -> "30000");
+        registry.add("spring.datasource.hikari.connectionTimeout", () -> "30000");
+        registry.add("spring.datasource.hikari.maximumPoolSize", () -> "5");
 
 
     }
