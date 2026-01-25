@@ -35,7 +35,6 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-
       - name: SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
