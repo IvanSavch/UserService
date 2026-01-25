@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 
 @Service
-@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RedisTemplate<String, User> userRedisTemplate;
@@ -47,10 +46,8 @@ public class UserServiceImpl implements UserService {
         String cacheKey = CACHE_KEY_PREFIX + id;
         User userFromCache = userRedisTemplate.opsForValue().get(cacheKey);
         if (userFromCache != null) {
-            log.info("User found in cache: id={}",id);
             return userFromCache;
         }
-        log.info("User not found in cache: id={}",id);
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         userRedisTemplate.opsForValue().set(cacheKey,user,CACHE_TTL_MINUTES, TimeUnit.MINUTES);
         return user;
@@ -75,7 +72,6 @@ public class UserServiceImpl implements UserService {
 
         String cacheKey = CACHE_KEY_PREFIX + id;
         userRedisTemplate.delete(cacheKey);
-        log.info("deleted from cache: id={}",id);
         return userRepository.save(userOnDB);
     }
 
@@ -85,7 +81,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         String cacheKey = CACHE_KEY_PREFIX + id;
         userRedisTemplate.delete(cacheKey);
-        log.info("deleted from cache: id={}",id);
         userRepository.activateUserById(user.getId());
     }
 
@@ -95,7 +90,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         String cacheKey = CACHE_KEY_PREFIX + id;
         userRedisTemplate.delete(cacheKey);
-        log.info("deleted from cache: id={}",id);
         userRepository.deactivateUserById(user.getId());
     }
 
@@ -107,7 +101,6 @@ public class UserServiceImpl implements UserService {
         }
         String cacheKey = CACHE_KEY_PREFIX + user.getId();
         userRedisTemplate.delete(cacheKey);
-        log.info("deleted from cache: id={}",user.getId());
         userRepository.delete(user);
     }
 }
