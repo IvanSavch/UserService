@@ -22,7 +22,6 @@ import org.testcontainers.utility.MountableFile;
 
 @Testcontainers
 @SpringBootTest
-@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Slf4j
 public abstract class AbstractTestController {
@@ -38,9 +37,9 @@ public abstract class AbstractTestController {
     }
     @Container
     static  PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
-            .withDatabaseName("testDB")
-            .withUsername("postgres")
-            .withPassword("root")
+            .withDatabaseName("test")
+            .withUsername("test")
+            .withPassword("test")
             .waitingFor(Wait.forListeningPort());
     @Container
     static  GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
@@ -56,9 +55,6 @@ public abstract class AbstractTestController {
         registry.add("spring.datasource.username", () -> postgres.getUsername());
         registry.add("spring.datasource.password", () -> postgres.getPassword());
 
-        registry.add("spring.datasource.hikari.maxLifetime", () -> "30000");
-        registry.add("spring.datasource.hikari.connectionTimeout", () -> "30000");
-        registry.add("spring.datasource.hikari.maximumPoolSize", () -> "5");
 
 
     }
