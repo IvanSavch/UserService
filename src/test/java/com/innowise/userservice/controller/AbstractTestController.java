@@ -19,7 +19,7 @@ import java.time.Duration;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
-public class TestController {
+public abstract class AbstractTestController {
     @Container
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("postgres")

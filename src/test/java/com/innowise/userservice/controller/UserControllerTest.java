@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @Transactional
 @ActiveProfiles("test")
-class UserControllerTest extends TestController {
+class UserControllerTest extends AbstractTestController {
     @Autowired
     private MockMvc mockMvc;
 
