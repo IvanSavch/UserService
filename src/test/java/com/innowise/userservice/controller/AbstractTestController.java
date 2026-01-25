@@ -1,9 +1,12 @@
 package com.innowise.userservice.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -22,6 +25,16 @@ import org.testcontainers.utility.MountableFile;
 @AutoConfigureMockMvc
 @Slf4j
 public abstract class AbstractTestController {
+
+    @Autowired
+    private Environment environment;
+
+    @BeforeEach
+    void logProperties() {
+        log.info("PostgreSQL URL: {}", environment.getProperty("spring.datasource.url"));
+        log.info("Redis host: {}", environment.getProperty("spring.data.redis.host"));
+        log.info("Redis port: {}", environment.getProperty("spring.data.redis.port"));
+    }
     @Container
     static  PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
             .withDatabaseName("testDB")
