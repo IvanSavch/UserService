@@ -41,7 +41,6 @@ public abstract class AbstractTestController {
             .withDatabaseName("testDB")
             .withUsername("postgres")
             .withPassword("root")
-            .withReuse(true)
             .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1));
     @Container
     static  GenericContainer<?> redis = new GenericContainer<>("redis").withExposedPorts(6379);
@@ -52,7 +51,7 @@ public abstract class AbstractTestController {
     }
     @DynamicPropertySource
     static void postgresProperties(DynamicPropertyRegistry registry) {
-        log.info("Postgres JDBC URL: {}", postgres.getJdbcUrl());
+        postgres.start();
         registry.add("spring.datasource.url", () -> postgres.getJdbcUrl());
         registry.add("spring.datasource.username", () -> postgres.getUsername());
         registry.add("spring.datasource.password", () -> postgres.getPassword());
