@@ -8,7 +8,6 @@ import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -62,11 +61,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateById(Long id, UserUpdateDto userUpdateDto) {
         User userOnDB = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        if (!userOnDB.getEmail().equals(userUpdateDto.getEmail())) {
-            if (userRepository.findEmail(userUpdateDto.getEmail()) != null) {
+        if (!userOnDB.getEmail().equals(userUpdateDto.getEmail()) && userRepository.findEmail(userUpdateDto.getEmail()) != null) {
                 throw new DuplicateEmailException();
             }
-        }
+
         userOnDB = UserMapper.INSTANCE.toUser(userUpdateDto);
         userOnDB.setId(id);
 

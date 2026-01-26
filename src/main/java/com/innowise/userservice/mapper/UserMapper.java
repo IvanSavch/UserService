@@ -14,7 +14,6 @@ import java.util.List;
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class );
     User toUser(UserCreateDto userCreateDto);
-    UserCreateDto toUserRequestDto(User user);
     User toUser(UserUpdateDto userUpdateDto);
     UserResponseDto toUserResponseDto(User user);
     List<UserResponseDto> toUserResponseDtoList(List<User> userList);

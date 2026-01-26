@@ -1,9 +1,9 @@
 package com.innowise.userservice.exception;
 
 public class UserNotFoundException extends RuntimeException {
-    private static final String message = "User not found";
+    private static final String DEFAULT_MESSAGE = "User not found";
     public UserNotFoundException() {
-        super(message);
+        super(DEFAULT_MESSAGE);
 
     }
 }

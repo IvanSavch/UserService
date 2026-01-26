@@ -1,8 +1,8 @@
 package com.innowise.userservice.exception;
 
 public class CardNotFoundException extends RuntimeException {
-    private static final String message = "Card not found";
+    private static final String DEFAULT_MESSAGE = "Card not found";
     public CardNotFoundException() {
-        super(message);
+        super(DEFAULT_MESSAGE);
     }
 }

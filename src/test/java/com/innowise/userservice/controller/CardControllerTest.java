@@ -9,9 +9,6 @@ import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
 import com.innowise.userservice.repository.UserRepository;
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -42,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
-@Slf4j
 class CardControllerTest {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
@@ -53,7 +49,7 @@ class CardControllerTest {
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis")
             .withExposedPorts(6379)
-            .waitingFor(Wait.forListeningPort());;
+            .waitingFor(Wait.forListeningPort());
     @DynamicPropertySource
     static void redisProperties(DynamicPropertyRegistry registry) {
         redis.start();
@@ -66,8 +62,6 @@ class CardControllerTest {
         registry.add("spring.datasource.url", () -> postgres.getJdbcUrl());
         registry.add("spring.datasource.username", () -> postgres.getUsername());
         registry.add("spring.datasource.password", () -> postgres.getPassword());
-
-
 
     }
 
