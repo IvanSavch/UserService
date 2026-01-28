@@ -35,7 +35,7 @@ jobs:
         run: docker save user-service -o user-service.tar
 
       - name: Upload docker image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
          name: user service image
          path: user-service.tar
