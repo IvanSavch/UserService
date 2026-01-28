@@ -98,7 +98,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
-    public Card setStatusById(Long id, CardStatusDto cardStatusDto) {
+    public Card setStatus(Long id, CardStatusDto cardStatusDto) {
         Card card = cardRepository.findById(id).orElseThrow(CardNotFoundException::new);
         card.setActive(cardStatusDto.isActive());
         String cacheKey = CACHE_KEY_PREFIX + id;

@@ -151,7 +151,7 @@ class UserControllerTest {
     void setStatus() throws Exception {
         UserStatusDto userStatusDto  =new UserStatusDto();
         userStatusDto.setActive(true);
-        mockMvc.perform(patch("/users/{id}", testUser.getId())
+        mockMvc.perform(patch("/users/{id}/status", testUser.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userStatusDto)))
                 .andExpect(status().isOk())

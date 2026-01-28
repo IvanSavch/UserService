@@ -2,6 +2,8 @@ package com.innowise.userservice.service;
 
 import com.innowise.userservice.exception.DuplicateEmailException;
 import com.innowise.userservice.exception.UserNotFoundException;
+import com.innowise.userservice.mapper.CardMapper;
+import com.innowise.userservice.mapper.UserMapper;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.dto.user.UserStatusDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
@@ -37,6 +39,10 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
     @Mock
+    private CardMapper cardMapper;
+    @Mock
+    private UserMapper userMapper;
+    @Mock
     private RedisTemplate<String, User> userRedisTemplate;
     @Mock
     private ValueOperations<String, User> valueOperations;
@@ -54,7 +60,13 @@ class UserServiceImplTest {
         userCreateDto.setName("test");
         userCreateDto.setSurname("Sauchanka");
         userCreateDto.setEmail("test@mail");
+        User  cUser = new User();
+        cUser.setBirthDate(LocalDate.now());
+        cUser.setName("test");
+        cUser.setSurname("Sauchanka");
+        cUser.setEmail("test@mail");
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userMapper.toUser(userCreateDto)).thenReturn(cUser);
         User user = userService.create(userCreateDto);
         assertNotNull(user);
         assertEquals("test@mail",user.getEmail());
@@ -115,8 +127,12 @@ class UserServiceImplTest {
         user.setEmail("test@mail.com");
         UserUpdateDto userUpdateDto = new UserUpdateDto();
         userUpdateDto.setEmail("Ivan@mail.com");
+        User updatedUser = new User();
+        updatedUser.setId(USER_ID);
+        updatedUser.setEmail("Ivan@mail.com");
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(userRepository.findEmail("Ivan@mail.com")).thenReturn(null);
+        when(userMapper.toUser(userUpdateDto)).thenReturn(updatedUser);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         User updateUser = userService.updateById(USER_ID,userUpdateDto);
         assertEquals("Ivan@mail.com",updateUser.getEmail());
@@ -134,7 +150,7 @@ class UserServiceImplTest {
         userStatusDto.setActive(true);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        User u = userService.setStatusById(USER_ID, userStatusDto);
+        User u = userService.setStatus(USER_ID, userStatusDto);
         assertNotNull(u);
         assertTrue(u.isActive());
         verify(userRepository).findById(USER_ID);

@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User setStatusById(Long id, UserStatusDto userStatusDto) {
+    public User setStatus(Long id, UserStatusDto userStatusDto) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.setActive(userStatusDto.isActive());
 

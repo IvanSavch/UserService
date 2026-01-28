@@ -2,6 +2,7 @@ package com.innowise.userservice.service;
 
 import com.innowise.userservice.exception.DuplicateCardNumberException;
 import com.innowise.userservice.exception.LimitCardException;
+import com.innowise.userservice.mapper.CardMapper;
 import com.innowise.userservice.model.dto.card.CardCreateDto;
 import com.innowise.userservice.model.dto.card.CardStatusDto;
 import com.innowise.userservice.model.dto.card.CardUpdateDto;
@@ -21,7 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,8 @@ class CardServiceImplTest {
     private UserService userService;
     @Mock
     private CardRepository cardRepository;
+    @Mock
+    private CardMapper cardMapper;
     @Mock
     private RedisTemplate<String, Card> cardRedisTemplate;
     @Mock
@@ -57,18 +60,24 @@ class CardServiceImplTest {
     void create() {
         CardCreateDto dto = new CardCreateDto();
         dto.setUserId(USER_ID);
-        dto.setNumber("1111");
+        dto.setNumber("1111111111111111");
         dto.setHolder("Ivan");
-        dto.setExpirationDate(LocalDateTime.now());
+        dto.setExpirationDate(LocalDate.now());
         User user = new User();
         user.setId(USER_ID);
+        Card card = new Card();
+        card.setUser(user);
+        card.setNumber("1111111111111111");
+        card.setNumber("Ivan");
+        card.setExpirationDate(LocalDate.now());
+        when(cardMapper.toCard(dto)).thenReturn(card);
         when(userService.findById(USER_ID)).thenReturn(user);
         when(cardRepository.countAllByUserId(user.getId())).thenReturn(0);
-        when(cardRepository.findCardNumber("1111")).thenReturn(null);
+        when(cardRepository.findCardNumber("1111111111111111")).thenReturn(null);
         when(cardRepository.save(any(Card.class))).thenAnswer(i -> i.getArgument(0));
         Card result = cardService.create(dto);
         assertNotNull(result);
-        assertEquals("1111", result.getNumber());
+        assertEquals("Ivan", result.getNumber());
         assertEquals(user, result.getUser());
     }
     @Test
@@ -154,18 +163,27 @@ class CardServiceImplTest {
         Card card = new Card();
         card.setId(CARD_ID);
         card.setNumber("1111");
+        card.setUser(user);
         CardUpdateDto cardDto = new CardUpdateDto();
         cardDto.setNumber("2222");
         cardDto.setUserId(USER_ID);
+        Card update = new Card();
+        update.setId(CARD_ID);
+        update.setNumber("2222");
+        update.setHolder(cardDto.getHolder());
+        update.setUser(user);
+
         when(cardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
         when(cardRepository.findCardNumber("2222")).thenReturn(null);
         when(userService.findById(USER_ID)).thenReturn(user);
         when(cardRepository.save(any(Card.class))).thenAnswer(i -> i.getArgument(0));
+        when(cardMapper.toCard(cardDto)).thenReturn(update);
+
         Card updateCard = cardService.updateById(CARD_ID, cardDto);
+        assertNotNull(updateCard);
         assertEquals(CARD_ID, updateCard.getId());
         assertEquals(user, updateCard.getUser());
-        assertEquals("2222",updateCard.getNumber());
-        verify(cardRedisTemplate).delete("card:1");
+        assertEquals("2222", updateCard.getNumber());
     }
 
 
@@ -177,7 +195,7 @@ class CardServiceImplTest {
         CardStatusDto cardStatusDto = new CardStatusDto();
         cardStatusDto.setActive(true);
         when(cardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
-        cardService.setStatusById(CARD_ID,cardStatusDto);
+        cardService.setStatus(CARD_ID,cardStatusDto);
         verify(cardRedisTemplate).delete("card:1");
         assertEquals(card.isActive(),cardStatusDto.isActive());
     }

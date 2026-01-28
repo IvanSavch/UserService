@@ -18,7 +18,7 @@ public interface UserService {
 
     User updateById(Long id, UserUpdateDto userUpdateDto);
 
-    User setStatusById(Long id, UserStatusDto userStatusDto);
+    User setStatus(Long id, UserStatusDto userStatusDto);
 
     void deleteUser(User user);
 }

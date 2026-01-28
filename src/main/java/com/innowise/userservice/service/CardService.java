@@ -19,7 +19,7 @@ public interface CardService {
 
     List<Card> findAllCardByUserId(Long userId);
 
-    Card setStatusById(Long id, CardStatusDto cardStatusDto);
+    Card setStatus(Long id, CardStatusDto cardStatusDto);
 
     void deleteCard(Card card);
 }

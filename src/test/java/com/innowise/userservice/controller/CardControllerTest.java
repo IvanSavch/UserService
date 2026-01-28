@@ -30,7 +30,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -134,7 +133,7 @@ class CardControllerTest {
         cardDto.setUserId(userId);
         cardDto.setNumber("9234123412341234");
         cardDto.setHolder("Ivan");
-        cardDto.setExpirationDate(LocalDateTime.now().plusYears(2));
+        cardDto.setExpirationDate(LocalDate.ofEpochDay(2));
         cardDto.setActive(true);
 
         try {
@@ -152,7 +151,7 @@ class CardControllerTest {
         CardUpdateDto cardUpdateDto = new CardUpdateDto();
         cardUpdateDto.setHolder("new holder");
         cardUpdateDto.setNumber("1234123412341234");
-        cardUpdateDto.setExpirationDate(LocalDateTime.now());
+        cardUpdateDto.setExpirationDate(LocalDate.now());
         cardUpdateDto.setActive(true);
         cardUpdateDto.setUserId(testUser.getId());
 
@@ -200,7 +199,7 @@ class CardControllerTest {
     }
 
     @Test
-    void activateCard() throws Exception {
+    void setStatus() throws Exception {
         Long cardId = testCard.getId();
         CardStatusDto statusDto = new CardStatusDto();
         statusDto.setActive(true);

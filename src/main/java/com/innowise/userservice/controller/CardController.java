@@ -72,7 +72,7 @@ public class CardController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<CardResponseDto> setStatusCard(@PathVariable Long id, @RequestBody CardStatusDto cardStatusDto) {
-        Card card = cardService.setStatusById(id, cardStatusDto);
+        Card card = cardService.setStatus(id, cardStatusDto);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);
         return ResponseEntity.ok().body(cardResponseDto);
     }

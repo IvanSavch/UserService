@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +21,7 @@ public class BaseCardDto {
     @NotBlank(message = "Holder can't be null")
     private String holder;
     @NotNull(message = "Expiration date can't be null")
-    private LocalDateTime expirationDate;
+    private LocalDate expirationDate;
     private boolean active;
    
 }

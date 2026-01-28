@@ -73,7 +73,7 @@ public class UserController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<UserResponseDto> setStatus(@PathVariable Long id, @RequestBody UserStatusDto userStatusDto) {
-        User user = userService.setStatusById(id, userStatusDto);
+        User user = userService.setStatus(id, userStatusDto);
         UserResponseDto userResponseDto = userMapper.toUserResponseDto(user);
         return ResponseEntity.ok().body(userResponseDto);
     }
