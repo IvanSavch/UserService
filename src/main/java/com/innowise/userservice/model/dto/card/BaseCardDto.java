@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 public class BaseCardDto {
-    @NotNull(message = "Number can't be null")
+
     @NotBlank(message = "Number can't be empty")
-    @Size(min = 16,message = "Size must be 16")
+    @Size(min = 16,max = 16,message = "Size must be 16")
     private String number;
-    @NotNull(message = "Holder can't be null")
+
     @NotBlank(message = "Holder can't be null")
     private String holder;
     @NotNull(message = "Expiration date can't be null")

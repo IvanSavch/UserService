@@ -1,24 +1,24 @@
 package com.innowise.userservice.service;
 
 import com.innowise.userservice.model.dto.user.UserCreateDto;
+import com.innowise.userservice.model.dto.user.UserStatusDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface UserService {
     User create(UserCreateDto userCreateDto);
 
     User findById(Long id);
 
-    List<User> findAllUser(Pageable pageable);
+    Page<User> findAll(Pageable pageable);
+    Page<User> findAllWithFilters(Pageable pageable, String name,String surname);
 
     User updateById(Long id, UserUpdateDto userUpdateDto);
 
-    void activateUserById(Long id);
-
-    void deactivateUserById(Long id);
+    User setStatusById(Long id, UserStatusDto userStatusDto);
 
     void deleteUser(User user);
 }

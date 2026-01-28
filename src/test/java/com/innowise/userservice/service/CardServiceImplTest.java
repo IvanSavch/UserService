@@ -3,6 +3,7 @@ package com.innowise.userservice.service;
 import com.innowise.userservice.exception.DuplicateCardNumberException;
 import com.innowise.userservice.exception.LimitCardException;
 import com.innowise.userservice.model.dto.card.CardCreateDto;
+import com.innowise.userservice.model.dto.card.CardStatusDto;
 import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
@@ -141,7 +142,7 @@ class CardServiceImplTest {
         List<Card> cards = List.of(card1, card2);
         Page<Card> cardPage = new PageImpl<>(cards);
         when(cardRepository.findAll(pageable)).thenReturn(cardPage);
-        List<Card> result = cardService.findAllCard(pageable);
+        List<Card> result = cardService.findAllCard(pageable).getContent();
         assertEquals(2, result.size());
         verify(cardRepository).findAll(pageable);
     }
@@ -166,25 +167,19 @@ class CardServiceImplTest {
         assertEquals("2222",updateCard.getNumber());
         verify(cardRedisTemplate).delete("card:1");
     }
-    @Test
-    void activateCardById() {
-        Card card = new Card();
-        card.setId(CARD_ID);
-        when(cardRepository.findById(CARD_ID))
-                .thenReturn(Optional.of(card));
-        cardService.activateCardById(CARD_ID);
-        verify(cardRepository).activateCardById(CARD_ID);
-        verify(cardRedisTemplate).delete("card:1");
-    }
+
 
     @Test
-    void deactivateCardById() {
+    void setStatus() {
         Card card = new Card();
         card.setId(CARD_ID);
+        card.setActive(false);
+        CardStatusDto cardStatusDto = new CardStatusDto();
+        cardStatusDto.setActive(true);
         when(cardRepository.findById(CARD_ID)).thenReturn(Optional.of(card));
-        cardService.deactivateCardById(CARD_ID);
-        verify(cardRepository).deactivateCardById(CARD_ID);
+        cardService.setStatusById(CARD_ID,cardStatusDto);
         verify(cardRedisTemplate).delete("card:1");
+        assertEquals(card.isActive(),cardStatusDto.isActive());
     }
 
     @Test

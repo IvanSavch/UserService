@@ -5,30 +5,43 @@ import com.innowise.userservice.exception.DuplicateEmailException;
 import com.innowise.userservice.exception.UserNotFoundException;
 import com.innowise.userservice.mapper.UserMapper;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
+import com.innowise.userservice.model.dto.user.UserStatusDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
+import com.innowise.userservice.specification.UserSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
-    private final RedisTemplate<String, User> userRedisTemplate;
     private static final String CACHE_KEY_PREFIX = "user:";
     private static final long CACHE_TTL_MINUTES = 1;
+    private final UserRepository userRepository;
+    private final RedisTemplate<String, User> userRedisTemplate;
+    private final UserMapper userMapper;
+
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RedisTemplate<String, User> userRedisTemplate) {
+    public UserServiceImpl(UserRepository userRepository, RedisTemplate<String, User> userRedisTemplate, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userRedisTemplate = userRedisTemplate;
+        this.userMapper = userMapper;
+    }
+
+    @Override
+    public Page<User> findAllWithFilters(Pageable pageable, String name,String surname) {
+        Specification<User> userSpecification = Specification.allOf(UserSpecification.hasName(name))
+                .and(UserSpecification.hasSurname(surname));
+        return userRepository.findAll(userSpecification,pageable);
     }
 
     @Override
@@ -36,11 +49,12 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findEmail(userCreateDto.getEmail()) != null) {
             throw new DuplicateEmailException();
         }
-        User user = UserMapper.INSTANCE.toUser(userCreateDto);
+        User user = userMapper.toUser(userCreateDto);
         return userRepository.save(user);
     }
 
     @Override
+    @Transactional
     public User findById(Long id) {
         String cacheKey = CACHE_KEY_PREFIX + id;
         User userFromCache = userRedisTemplate.opsForValue().get(cacheKey);
@@ -53,8 +67,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllUser(Pageable pageable) {
-        return userRepository.findAll(pageable).getContent();
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     @Override
@@ -65,7 +79,7 @@ public class UserServiceImpl implements UserService {
                 throw new DuplicateEmailException();
             }
 
-        userOnDB = UserMapper.INSTANCE.toUser(userUpdateDto);
+        userOnDB = userMapper.toUser(userUpdateDto);
         userOnDB.setId(id);
 
         String cacheKey = CACHE_KEY_PREFIX + id;
@@ -75,20 +89,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void activateUserById(Long id) {
+    public User setStatusById(Long id, UserStatusDto userStatusDto) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        String cacheKey = CACHE_KEY_PREFIX + id;
-        userRedisTemplate.delete(cacheKey);
-        userRepository.activateUserById(user.getId());
-    }
+        user.setActive(userStatusDto.isActive());
 
-    @Override
-    @Transactional
-    public void deactivateUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         String cacheKey = CACHE_KEY_PREFIX + id;
         userRedisTemplate.delete(cacheKey);
-        userRepository.deactivateUserById(user.getId());
+
+        return userRepository.save(user);
     }
 
     @Override

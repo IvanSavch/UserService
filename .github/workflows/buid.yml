@@ -28,6 +28,17 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
+      - name: Build Docker image
+        run: docker build -t user-service .
+
+      - name: Save docker image as artifact
+        run: docker save user-service -o user-service.tar
+
+      - name: Upload docker image artifact
+        uses: actions/upload-artifact@v3
+        with:
+         name: user service image
+         path: user-service.tar
 
       - name: Cache SonarQube packages
         uses: actions/cache@v3

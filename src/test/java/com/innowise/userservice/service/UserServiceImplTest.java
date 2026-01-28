@@ -3,6 +3,7 @@ package com.innowise.userservice.service;
 import com.innowise.userservice.exception.DuplicateEmailException;
 import com.innowise.userservice.exception.UserNotFoundException;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
+import com.innowise.userservice.model.dto.user.UserStatusDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
@@ -89,8 +90,8 @@ class UserServiceImplTest {
         List<User> users = List.of(user1, user2);
         Page<User> userPage = new PageImpl<>(users);
         when(userRepository.findAll(pageable)).thenReturn(userPage);
-        List<User> result = userService.findAllUser(pageable);
-        assertEquals(2, result.size());
+        Page<User> result = userService.findAll(pageable);
+        assertEquals(2, result.getTotalElements());
         verify(userRepository).findAll(pageable);
     }
     @Test
@@ -123,24 +124,23 @@ class UserServiceImplTest {
 
     }
 
-    @Test
-    void activateUserById() {
-        User user = new User();
-        user.setId(USER_ID);
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        userService.activateUserById(USER_ID);
-        verify(userRedisTemplate).delete("user:1");
-        verify(userRepository).activateUserById(USER_ID);
-    }
 
     @Test
-    void deactivateUserById() {
+    void setStatusById() {
         User user = new User();
+        user.setActive(false);
         user.setId(USER_ID);
+        UserStatusDto userStatusDto = new UserStatusDto();
+        userStatusDto.setActive(true);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        userService.deactivateUserById(USER_ID);
+        User u = userService.setStatusById(USER_ID, userStatusDto);
+        assertNotNull(u);
+        assertTrue(u.isActive());
+        verify(userRepository).findById(USER_ID);
         verify(userRedisTemplate).delete("user:1");
-        verify(userRepository).deactivateUserById(USER_ID);
+        verify(userRepository).save(any(User.class));
+
     }
 
     @Test

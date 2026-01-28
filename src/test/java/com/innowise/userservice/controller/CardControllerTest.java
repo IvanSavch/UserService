@@ -2,6 +2,7 @@ package com.innowise.userservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innowise.userservice.model.dto.card.CardCreateDto;
+import com.innowise.userservice.model.dto.card.CardStatusDto;
 import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
 import com.innowise.userservice.model.entity.Card;
@@ -9,7 +10,10 @@ import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
 import com.innowise.userservice.repository.UserRepository;
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +34,7 @@ import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CardControllerTest {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
@@ -71,9 +77,36 @@ class CardControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private CardRepository cardRepository;
+    private  CardRepository cardRepository;
     @Autowired
-    private UserRepository userRepository;
+    private  UserRepository userRepository;
+    private static User testUser;
+    private static Card testCard;
+
+    @BeforeAll
+     void  setUp() {
+        testUser = new User();
+        testUser.setName("Ivan");
+        testUser.setSurname("Sauchanka");
+        testUser.setEmail("ivan@mail.com");
+        testUser.setBirthDate(LocalDate.now());
+        userRepository.save(testUser);
+
+        testCard = new Card();
+        testCard.setHolder("Ivan");
+        testCard.setNumber("1234123412341234");
+        testCard.setExpirationDate(LocalDate.now().plusYears(2));
+        testCard.setActive(false);
+        testCard.setUser(testUser);
+        cardRepository.save(testCard);
+    }
+
+    @AfterAll
+     void tearDown() {
+
+        cardRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     void createCard() {
@@ -81,11 +114,11 @@ class CardControllerTest {
         userCreateDto.setSurname("Sauchanka");
         userCreateDto.setBirthDate(LocalDate.now());
         userCreateDto.setName("Ivan");
-        userCreateDto.setEmail("ivan@mail.com");
+        userCreateDto.setEmail("i@mail.com");
 
         String userResponse;
         try {
-            userResponse = mockMvc.perform(post("/user/")
+            userResponse = mockMvc.perform(post("/users")
                             .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(userCreateDto)))
                     .andExpect(status().isCreated())
                     .andReturn()
@@ -99,16 +132,16 @@ class CardControllerTest {
 
         CardCreateDto cardDto = new CardCreateDto();
         cardDto.setUserId(userId);
-        cardDto.setNumber("1234123412341234");
+        cardDto.setNumber("9234123412341234");
         cardDto.setHolder("Ivan");
         cardDto.setExpirationDate(LocalDateTime.now().plusYears(2));
         cardDto.setActive(true);
 
         try {
-            mockMvc.perform(post("/card/")
+            mockMvc.perform(post("/cards")
                             .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(cardDto)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.number").value("1234123412341234"));
+                    .andExpect(jsonPath("$.number").value("9234123412341234"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -116,185 +149,72 @@ class CardControllerTest {
 
     @Test
     void updateCard() throws Exception {
-        User user = new User();
-        user.setSurname("Sauchanka");
-        user.setBirthDate(LocalDate.now());
-        user.setName("Ivan");
-        user.setEmail("ivan@mail.com");
-
-        User u = userRepository.save(user);
-
-        Card card = new Card();
-        card.setUser(u);
-        card.setHolder("Ivan");
-        card.setNumber("1234123412341234");
-        card.setExpirationDate(LocalDateTime.now());
-        card.setActive(true);
-
-        Card c = cardRepository.save(card);
-
         CardUpdateDto cardUpdateDto = new CardUpdateDto();
         cardUpdateDto.setHolder("new holder");
         cardUpdateDto.setNumber("1234123412341234");
         cardUpdateDto.setExpirationDate(LocalDateTime.now());
         cardUpdateDto.setActive(true);
-        cardUpdateDto.setUserId(u.getId());
+        cardUpdateDto.setUserId(testUser.getId());
 
-        mockMvc.perform(put("/card/{id}", c.getId())
+        mockMvc.perform(put("/cards/{id}", testCard.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper
                                 .writeValueAsString(cardUpdateDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(c.getId()))
+                .andExpect(jsonPath("$.id").value(testCard.getId()))
                 .andExpect(jsonPath("$.holder").value("new holder"));
     }
 
     @Test
     void findById() throws Exception {
-        User user = new User();
-        user.setSurname("Sauchanka");
-        user.setBirthDate(LocalDate.now());
-        user.setName("Ivan");
-        user.setEmail("ivan@mail.com");
-        User u = userRepository.save(user);
 
-        Card card = new Card();
-        card.setUser(u);
-        card.setHolder("Ivan");
-        card.setNumber("1234123412341234");
-        card.setExpirationDate(LocalDateTime.now());
-        card.setActive(true);
-        Card c = cardRepository.save(card);
-
-        mockMvc.perform(get("/card/{id}", c.getId()))
+        mockMvc.perform(get("/cards/{id}", testCard.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(c.getId()));
+                .andExpect(jsonPath("$.id").value(testCard.getId()));
     }
 
     @Test
     void findAll() throws Exception {
-        User user = new User();
-        user.setSurname("Sauchanka");
-        user.setBirthDate(LocalDate.now());
-        user.setName("Ivan");
-        user.setEmail("ivan@mail.com");
-
-        User u = userRepository.save(user);
-
-        Card card = new Card();
-        card.setUser(u);
-        card.setHolder("Ivan");
-        card.setNumber("1234123412341234");
-        card.setExpirationDate(LocalDateTime.now());
-        card.setActive(true);
-
         Card card1 = new Card();
-        card1.setUser(u);
+        card1.setUser(testUser);
         card1.setHolder("Ivan");
-        card1.setNumber("1234123412341234");
-        card1.setExpirationDate(LocalDateTime.now());
+        card1.setNumber("0234123412341234");
+        card1.setExpirationDate(LocalDate.now());
         card1.setActive(true);
 
-        cardRepository.save(card);
         cardRepository.save(card1);
 
-        mockMvc.perform(get("/card/").param("page", "0"))
+        mockMvc.perform(get("/cards").param("page", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*").isArray())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(card.getId()))
-                .andExpect(jsonPath("$[0].userId").value(user.getId()));
+                .andExpect(jsonPath("$[0].id").value(testCard.getId()))
+                .andExpect(jsonPath("$[0].userId").value(testUser.getId()));
     }
 
     @Test
     void findAllByUserId() throws Exception {
-        User user = new User();
-        user.setSurname("Sauchanka");
-        user.setBirthDate(LocalDate.now());
-        user.setName("Ivan");
-        user.setEmail("ivan@mail.com");
-
-        User u = userRepository.save(user);
-
-        Card card = new Card();
-        card.setUser(u);
-        card.setHolder("Ivan");
-        card.setNumber("1234123412341234");
-        card.setExpirationDate(LocalDateTime.now());
-        card.setActive(false);
-
-        Card c = cardRepository.save(card);
-
-        mockMvc.perform(get("/card/user/{id}", c.getUser().getId()))
+        mockMvc.perform(get("/cards/users/{id}", testCard.getUser().getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test
     void activateCard() throws Exception {
-        User user = new User();
-        user.setSurname("Sauchanka");
-        user.setBirthDate(LocalDate.now());
-        user.setName("Ivan");
-        user.setEmail("ivan@mail.com");
-
-        User u = userRepository.save(user);
-
-        Card card = new Card();
-        card.setUser(u);
-        card.setHolder("Ivan");
-        card.setNumber("1234123412341234");
-        card.setExpirationDate(LocalDateTime.now());
-        card.setActive(false);
-
-        Card c = cardRepository.save(card);
-
-        mockMvc.perform(put("/card/activate/{id}", c.getId()))
-                .andExpect(status().isOk());
+        Long cardId = testCard.getId();
+        CardStatusDto statusDto = new CardStatusDto();
+        statusDto.setActive(true);
+        mockMvc.perform(patch("/cards/{id}/status", cardId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statusDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(true));
     }
 
-    @Test
-    void deactivateUser() throws Exception {
-        User user = new User();
-        user.setSurname("Sauchanka");
-        user.setBirthDate(LocalDate.now());
-        user.setName("Ivan");
-        user.setEmail("ivan@mail.com");
-
-        User u = userRepository.save(user);
-
-        Card card = new Card();
-        card.setUser(u);
-        card.setHolder("Ivan");
-        card.setNumber("1234123412341234");
-        card.setExpirationDate(LocalDateTime.now());
-        card.setActive(true);
-
-        Card c = cardRepository.save(card);
-
-        mockMvc.perform(put("/card/deactivate/{id}",c.getId() ))
-                .andExpect(status().isOk());
-    }
 
     @Test
     void deleteCard() throws Exception {
-        User user = new User();
-        user.setSurname("Sauchanka");
-        user.setBirthDate(LocalDate.now());
-        user.setName("Ivan");
-        user.setEmail("ivan@mail.com");
 
-        User u = userRepository.save(user);
-
-        Card card = new Card();
-        card.setUser(u);
-        card.setHolder("Ivan");
-        card.setNumber("1234123412341234");
-        card.setExpirationDate(LocalDateTime.now());
-        card.setActive(true);
-
-        Card c = cardRepository.save(card);
-
-        mockMvc.perform(delete("/card/{id}", c.getId())).andExpect(status().isOk());
+        mockMvc.perform(delete("/cards/{id}", testCard.getId())).andExpect(status().isNoContent());
     }
 }

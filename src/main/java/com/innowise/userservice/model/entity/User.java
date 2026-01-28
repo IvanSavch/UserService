@@ -16,12 +16,13 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
+@Entity
 public class User extends Auditable{
 
     @Id
@@ -33,7 +34,7 @@ public class User extends Auditable{
     private String email;
     private boolean active;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user",orphanRemoval = true)
     @JsonManagedReference
     private List<Card> cardList;
 

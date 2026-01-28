@@ -1,4 +1,4 @@
-package com.innowise.userservice.model;
+package com.innowise.userservice.model.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ErrorResponse {
-    private String title;
-    private int status;
-
+public class UserStatusDto {
+    private boolean active;
 }

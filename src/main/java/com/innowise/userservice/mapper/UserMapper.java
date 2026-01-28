@@ -5,14 +5,14 @@ import com.innowise.userservice.model.dto.user.UserResponseDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Mapper(componentModel = "spring", imports = {Arrays.class})
+@Component
 public interface UserMapper {
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class );
     User toUser(UserCreateDto userCreateDto);
     User toUser(UserUpdateDto userUpdateDto);
     UserResponseDto toUserResponseDto(User user);

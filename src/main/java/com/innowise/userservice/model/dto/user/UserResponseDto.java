@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserResponseDto extends BaseUserDto {
     private Long id;
+    private boolean active;
 
 }
