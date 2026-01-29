@@ -133,7 +133,7 @@ class CardControllerTest {
         cardDto.setUserId(userId);
         cardDto.setNumber("9234123412341234");
         cardDto.setHolder("Ivan");
-        cardDto.setExpirationDate(LocalDate.ofEpochDay(2));
+        cardDto.setExpirationDate(LocalDate.now());
         cardDto.setActive(true);
 
         try {
@@ -203,7 +203,7 @@ class CardControllerTest {
         Long cardId = testCard.getId();
         CardStatusDto statusDto = new CardStatusDto();
         statusDto.setActive(true);
-        mockMvc.perform(patch("/cards/{id}/status", cardId)
+        mockMvc.perform(patch("/cards/{id}", cardId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(statusDto)))
                 .andExpect(status().isOk())
