@@ -1,6 +1,7 @@
 package com.innowise.userservice.service;
 
 import com.innowise.userservice.exception.CardNotFoundException;
+import com.innowise.userservice.exception.InvalidDateException;
 import com.innowise.userservice.exception.LimitCardException;
 import com.innowise.userservice.exception.DuplicateCardNumberException;
 import com.innowise.userservice.exception.UserNotFoundException;
@@ -11,13 +12,16 @@ import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
+import com.innowise.userservice.specification.CardSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -49,9 +53,14 @@ public class CardServiceImpl implements CardService {
         if (cardRepository.findCardNumber(cardCreateDto.getNumber()) != null) {
             throw new DuplicateCardNumberException();
         }
+        if (cardCreateDto.getExpirationDate().isBefore(LocalDate.now())){
+            throw new InvalidDateException();
+        }
         Card card = cardMapper.toCard(cardCreateDto);
         card.setUser(user);
-        return cardRepository.save(card);
+        Card save = cardRepository.save(card);
+        cardRedisTemplate.opsForValue().set(CACHE_KEY_PREFIX+save.getId(),save,CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+        return save;
 
     }
 
@@ -71,6 +80,13 @@ public class CardServiceImpl implements CardService {
     public Page<Card> findAllCard(Pageable pageable) {
         return cardRepository.findAll(pageable);
     }
+
+    @Override
+    public Page<Card> findAllWithFilters(Pageable pageable, String holder) {
+        Specification<Card> specification = Specification.allOf(CardSpecification.hasHolder(holder));
+        return cardRepository.findAll(specification,pageable);
+    }
+
     @Override
     @Transactional
     public Card updateById(Long id, CardUpdateDto cardUpdateDto) {

@@ -58,8 +58,9 @@ public class CardController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<CardResponseDto>> findAll(@RequestParam(required = false, defaultValue = "0") int page) {
-        List<Card> allCard = cardService.findAllCard(PageRequest.of(page, 20)).getContent();
+    public ResponseEntity<List<CardResponseDto>> findAll(@RequestParam(required = false, defaultValue = "0") int page,
+                                                         @RequestParam(required = false) String holder) {
+        List<Card> allCard = cardService.findAllWithFilters(PageRequest.of(page, 20),holder).getContent();
         List<CardResponseDto> cardResponseDtoList = cardMapper.toCardResponseDtoList(allCard);
         return ResponseEntity.ok(cardResponseDtoList);
     }
@@ -70,7 +71,7 @@ public class CardController {
         return ResponseEntity.ok(cardResponseDtoList);
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/{id}")
     public ResponseEntity<CardResponseDto> setStatusCard(@PathVariable Long id, @RequestBody CardStatusDto cardStatusDto) {
         Card card = cardService.setStatus(id, cardStatusDto);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);

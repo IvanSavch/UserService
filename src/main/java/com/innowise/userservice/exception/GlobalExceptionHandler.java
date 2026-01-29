@@ -16,9 +16,17 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(LimitCardException.class)
-    public ResponseEntity<ErrorResponse> handleLimitedCardException(LimitCardException limitCardException){
+    public ResponseEntity<ErrorResponse> handleLimitedCardException(LimitCardException limitCardException) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTitle(limitCardException.getMessage());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDateException(InvalidDateException invalidDateException) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTitle(invalidDateException.getMessage());
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.badRequest().body(errorResponse);
     }

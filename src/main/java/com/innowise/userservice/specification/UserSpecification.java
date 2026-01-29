@@ -7,7 +7,6 @@ public class UserSpecification {
 
     private UserSpecification() {
     }
-
     public static Specification<User> hasName(String name){
         if (name == null){
             return null;

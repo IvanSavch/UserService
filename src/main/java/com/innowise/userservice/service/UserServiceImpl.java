@@ -49,8 +49,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findEmail(userCreateDto.getEmail()) != null) {
             throw new DuplicateEmailException();
         }
+
         User user = userMapper.toUser(userCreateDto);
-        return userRepository.save(user);
+        User save = userRepository.save(user);
+        userRedisTemplate.opsForValue().set(CACHE_KEY_PREFIX + save.getId(),save,CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+        return save;
     }
 
     @Override

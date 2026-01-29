@@ -14,6 +14,7 @@ public interface CardService {
     Card findById(Long id);
 
     Page<Card> findAllCard(Pageable pageable);
+    Page<Card> findAllWithFilters(Pageable pageable ,String holder);
 
     Card updateById(Long id,CardUpdateDto cardUpdateDto);
 
