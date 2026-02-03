@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,6 +37,7 @@ public class CardController {
     }
 
     @PostMapping
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<CardResponseDto> createCard(@Valid @RequestBody CardCreateDto createDto) {
         Card card = cardService.create(createDto);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);
@@ -43,6 +45,7 @@ public class CardController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<CardResponseDto> updateCard(@PathVariable Long id, @Valid @RequestBody CardUpdateDto cardUpdateDto) {
         Card card = cardService.updateById(id, cardUpdateDto);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);
@@ -50,6 +53,7 @@ public class CardController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<CardResponseDto> findById(@PathVariable Long id) {
         Card card = cardService.findById(id);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);
@@ -58,6 +62,7 @@ public class CardController {
     }
 
     @GetMapping()
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<List<CardResponseDto>> findAll(@RequestParam(required = false, defaultValue = "0") int page,
                                                          @RequestParam(required = false) String holder) {
         List<Card> allCard = cardService.findAllWithFilters(PageRequest.of(page, 20),holder).getContent();
@@ -65,6 +70,7 @@ public class CardController {
         return ResponseEntity.ok(cardResponseDtoList);
     }
     @GetMapping("/users/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication) or @authenticationServiceImpl.isSelf(#id, authentication)")
     public ResponseEntity<List<CardResponseDto>> findAllByUserId(@PathVariable Long id){
         List<Card> allCardByUserId = cardService.findAllCardByUserId(id);
         List<CardResponseDto> cardResponseDtoList = cardMapper.toCardResponseDtoList(allCardByUserId);
@@ -72,6 +78,7 @@ public class CardController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<CardResponseDto> setStatusCard(@PathVariable Long id, @RequestBody CardStatusDto cardStatusDto) {
         Card card = cardService.setStatus(id, cardStatusDto);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);
@@ -79,6 +86,7 @@ public class CardController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<Void> deleteCard(@PathVariable Long id) {
         Card user = cardService.findById(id);
         cardService.deleteCard(user);
