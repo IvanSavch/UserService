@@ -8,7 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      JWT_ACCESS_SECRET:  ${{ secrets.JWT_ACCESS_SECRET }}
+      JWT_ACCESS_EXPIRATION: ${{ secrets.JWT_ACCESS_EXPIRATION }}
     steps:
       - uses: actions/checkout@v6
         with:
