@@ -52,7 +52,11 @@ public class UserController {
         UserResponseDto userResponseDto = userMapper.toUserResponseDto(user);
         return ResponseEntity.ok().body(userResponseDto);
     }
-
+    @GetMapping("/{email}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
+    public ResponseEntity<UserResponseDto> getByEmail(@PathVariable String email){
+        return ResponseEntity.ok(userService.findByEmail(email));
+    }
 
     @GetMapping("/{id}")
     @PreAuthorize("@authenticationServiceImpl.adminRole(authentication) or @authenticationServiceImpl.isSelf(#id, authentication)")

@@ -6,7 +6,7 @@ import com.innowise.userservice.model.dto.user.UserStatusDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
-import com.innowise.userservice.service.AuthenticationServiceImpl;
+import com.innowise.userservice.service.impl.AuthenticationServiceImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

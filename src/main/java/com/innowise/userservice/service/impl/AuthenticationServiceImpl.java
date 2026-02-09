@@ -1,5 +1,6 @@
-package com.innowise.userservice.service;
+package com.innowise.userservice.service.impl;
 
+import com.innowise.userservice.service.AuthenticationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.innowise.userservice.service;
+package com.innowise.userservice.service.impl;
 
 import com.innowise.userservice.exception.CardNotFoundException;
 import com.innowise.userservice.exception.InvalidDateException;
@@ -12,6 +12,8 @@ import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
+import com.innowise.userservice.service.CardService;
+import com.innowise.userservice.service.UserService;
 import com.innowise.userservice.specification.CardSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
