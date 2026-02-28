@@ -86,7 +86,7 @@ public class CardController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication) or @authenticationServiceImpl.isSelf(#id, authentication)")
     public ResponseEntity<Void> deleteCard(@PathVariable Long id) {
         Card user = cardService.findById(id);
         cardService.deleteCard(user);
