@@ -116,7 +116,7 @@ class UserControllerTest {
         userCreateDto.setName("Ivan");
         userCreateDto.setEmail("iv@mail.com");
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/users/")
                         .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(userCreateDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value("iv@mail.com"));
@@ -164,7 +164,7 @@ class UserControllerTest {
         user1.setEmail("ivan1@mail.com");
 
         userRepository.save(user1);
-        mockMvc.perform(get("/users")).andExpect(status().isOk())
+        mockMvc.perform(get("/users/")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.*").isArray())
                 .andExpect(jsonPath("$.length()").value(2));
     }

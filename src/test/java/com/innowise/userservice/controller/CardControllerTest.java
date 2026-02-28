@@ -131,7 +131,7 @@ class CardControllerTest {
 
         String userResponse;
         try {
-            userResponse = mockMvc.perform(post("/users")
+            userResponse = mockMvc.perform(post("/users/")
                             .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(userCreateDto)))
                     .andExpect(status().isCreated())
                     .andReturn()
