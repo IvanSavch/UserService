@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class UserResponseDto extends BaseUserDto {
     private Long id;
     private boolean active;
+    private Long authId;
 
 }

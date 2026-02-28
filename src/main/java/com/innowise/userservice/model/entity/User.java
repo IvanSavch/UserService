@@ -28,6 +28,7 @@ public class User extends Auditable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long authId;
     private String name;
     private String surname;
     private LocalDate birthDate;

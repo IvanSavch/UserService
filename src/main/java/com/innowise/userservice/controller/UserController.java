@@ -37,7 +37,7 @@ public class UserController {
         this.userMapper = userMapper;
     }
 
-    @PostMapping()
+    @PostMapping("/")
     @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserCreateDto userCreateDto) {
         User user = userService.create(userCreateDto);
@@ -66,7 +66,7 @@ public class UserController {
         return ResponseEntity.ok(userResponseDto);
     }
 
-    @GetMapping()
+    @GetMapping("/")
     @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<List<UserResponseDto>> getAllUser(
             @RequestParam(required = false) String name,

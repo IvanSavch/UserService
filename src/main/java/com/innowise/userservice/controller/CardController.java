@@ -37,7 +37,7 @@ public class CardController {
     }
 
     @PostMapping
-    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication) or @authenticationServiceImpl.isSelf(#id, authentication)")
     public ResponseEntity<CardResponseDto> createCard(@Valid @RequestBody CardCreateDto createDto) {
         Card card = cardService.create(createDto);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);
