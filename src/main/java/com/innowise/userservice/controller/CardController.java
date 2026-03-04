@@ -36,10 +36,10 @@ public class CardController {
         this.cardMapper = cardMapper;
     }
 
-    @PostMapping
+    @PostMapping("/{id}/users")
     @PreAuthorize("@authenticationServiceImpl.adminRole(authentication) or @authenticationServiceImpl.isSelf(#id, authentication)")
-    public ResponseEntity<CardResponseDto> createCard(@Valid @RequestBody CardCreateDto createDto) {
-        Card card = cardService.create(createDto);
+    public ResponseEntity<CardResponseDto> createCard(@PathVariable Long id,@Valid @RequestBody CardCreateDto createDto) {
+        Card card = cardService.create(id,createDto);
         CardResponseDto cardResponseDto = cardMapper.toCardResponseDto(card);
         return ResponseEntity.status(HttpStatus.CREATED).body(cardResponseDto);
     }
@@ -61,7 +61,7 @@ public class CardController {
         return ResponseEntity.ok(cardResponseDto);
     }
 
-    @GetMapping()
+    @GetMapping("/")
     @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<List<CardResponseDto>> findAll(@RequestParam(required = false, defaultValue = "0") int page,
                                                          @RequestParam(required = false) String holder) {

@@ -91,6 +91,7 @@ class UserControllerTest {
     @BeforeAll
     void setUp() {
         testUser = new User();
+        testUser.setId(1L);
         testUser.setName("Ivan");
         testUser.setSurname("Sauchanka");
         testUser.setEmail("ivan@mail.com");
@@ -111,6 +112,7 @@ class UserControllerTest {
     @WithMockUser(roles = "ADMIN")
     void createUser() throws Exception {
         UserCreateDto userCreateDto = new UserCreateDto();
+        userCreateDto.setId(1L);
         userCreateDto.setSurname("Sauchanka");
         userCreateDto.setBirthDate(LocalDate.now());
         userCreateDto.setName("Ivan");
@@ -158,6 +160,7 @@ class UserControllerTest {
     void getAllUser() throws Exception {
 
         User user1 = new User();
+        user1.setId(2L);
         user1.setSurname("Sauchanka1");
         user1.setBirthDate(LocalDate.now());
         user1.setName("Ivan1");

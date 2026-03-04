@@ -12,5 +12,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class UserCreateDto extends BaseUserDto {
-    private Long authId;
+    private Long id;
 }

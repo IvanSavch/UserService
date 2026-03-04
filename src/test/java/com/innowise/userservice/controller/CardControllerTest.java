@@ -10,7 +10,6 @@ import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
 import com.innowise.userservice.repository.UserRepository;
 import com.innowise.userservice.service.impl.AuthenticationServiceImpl;
-import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,6 +93,7 @@ class CardControllerTest {
     @BeforeAll
      void  setUp() {
         testUser = new User();
+        testUser.setId(1L);
         testUser.setName("Ivan");
         testUser.setSurname("Sauchanka");
         testUser.setEmail("ivan@mail.com");
@@ -124,34 +124,20 @@ class CardControllerTest {
     @WithMockUser(roles = "ADMIN")
     void createCard() {
         UserCreateDto userCreateDto = new UserCreateDto();
+        userCreateDto.setId(1L);
         userCreateDto.setSurname("Sauchanka");
         userCreateDto.setBirthDate(LocalDate.now());
         userCreateDto.setName("Ivan");
         userCreateDto.setEmail("i@mail.com");
 
-        String userResponse;
-        try {
-            userResponse = mockMvc.perform(post("/users/")
-                            .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(userCreateDto)))
-                    .andExpect(status().isCreated())
-                    .andReturn()
-                    .getResponse()
-                    .getContentAsString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        Long userId = JsonPath.parse(userResponse).read("$.id", Long.class);
-
         CardCreateDto cardDto = new CardCreateDto();
-        cardDto.setUserId(userId);
         cardDto.setNumber("9234123412341234");
         cardDto.setHolder("Ivan");
         cardDto.setExpirationDate(LocalDate.now());
         cardDto.setActive(true);
 
         try {
-            mockMvc.perform(post("/cards")
+            mockMvc.perform(post("/cards/{id}/users",userCreateDto.getId())
                             .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(cardDto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.number").value("9234123412341234"));
@@ -200,7 +186,7 @@ class CardControllerTest {
 
         cardRepository.save(card1);
 
-        mockMvc.perform(get("/cards").param("page", "0"))
+        mockMvc.perform(get("/cards/").param("page", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*").isArray())
                 .andExpect(jsonPath("$.length()").value(2))

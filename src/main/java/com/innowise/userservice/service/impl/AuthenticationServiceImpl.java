@@ -1,18 +1,12 @@
 package com.innowise.userservice.service.impl;
 
-import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.service.AuthenticationService;
-import com.innowise.userservice.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private final UserService userService;
 
-    public AuthenticationServiceImpl(UserService userService) {
-        this.userService = userService;
-    }
 
     @Override
     public boolean adminRole(Authentication authentication) {
@@ -28,8 +22,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
-        User byId = userService.findById(userId);
+
         Long id = (Long)authentication.getPrincipal();
-        return byId.getAuthId().equals(id);
+        return userId.equals(id);
     }
 }

@@ -47,8 +47,8 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
-    public Card create(CardCreateDto cardCreateDto) {
-        User user = userService.findById(cardCreateDto.getUserId());
+    public Card create(Long userId,CardCreateDto cardCreateDto) {
+        User user = userService.findById(userId);
         if (cardRepository.countAllByUserId(user.getId()) >= 5) {
             throw new LimitCardException();
         }
