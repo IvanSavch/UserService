@@ -17,7 +17,6 @@ public class BaseCardDto {
     @NotBlank(message = "Number can't be empty")
     @Size(min = 16,max = 16,message = "Size must be 16")
     private String number;
-
     @NotBlank(message = "Holder can't be null")
     private String holder;
     @NotNull(message = "Expiration date can't be null")

@@ -1,4 +1,4 @@
-package com.innowise.userservice.service;
+package com.innowise.userservice.service.impl;
 
 import com.innowise.userservice.exception.CardNotFoundException;
 import com.innowise.userservice.exception.InvalidDateException;
@@ -12,6 +12,8 @@ import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
+import com.innowise.userservice.service.CardService;
+import com.innowise.userservice.service.UserService;
 import com.innowise.userservice.specification.CardSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -45,8 +47,8 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
-    public Card create(CardCreateDto cardCreateDto) {
-        User user = userService.findById(cardCreateDto.getUserId());
+    public Card create(Long userId,CardCreateDto cardCreateDto) {
+        User user = userService.findById(userId);
         if (cardRepository.countAllByUserId(user.getId()) >= 5) {
             throw new LimitCardException();
         }

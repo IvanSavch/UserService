@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,7 +37,8 @@ public class UserController {
         this.userMapper = userMapper;
     }
 
-    @PostMapping()
+    @PostMapping("/")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserCreateDto userCreateDto) {
         User user = userService.create(userCreateDto);
         UserResponseDto userResponseDto = userMapper.toUserResponseDto(user);
@@ -44,21 +46,28 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDto userUpdateDto) {
         User user = userService.updateById(id, userUpdateDto);
         UserResponseDto userResponseDto = userMapper.toUserResponseDto(user);
         return ResponseEntity.ok().body(userResponseDto);
     }
-
+    @GetMapping("/email/{email}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
+    public ResponseEntity<UserResponseDto> getByEmail(@PathVariable String email){
+        return ResponseEntity.ok(userService.findByEmail(email));
+    }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication) or @authenticationServiceImpl.isSelf(#id, authentication)")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         User user = userService.findById(id);
         UserResponseDto userResponseDto = userMapper.toUserResponseDto(user);
         return ResponseEntity.ok(userResponseDto);
     }
 
-    @GetMapping()
+    @GetMapping("/")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<List<UserResponseDto>> getAllUser(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String surname,
@@ -72,6 +81,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<UserResponseDto> setStatus(@PathVariable Long id, @RequestBody UserStatusDto userStatusDto) {
         User user = userService.setStatus(id, userStatusDto);
         UserResponseDto userResponseDto = userMapper.toUserResponseDto(user);
@@ -79,6 +89,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@authenticationServiceImpl.adminRole(authentication)")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         User user = userService.findById(id);
         userService.deleteUser(user);

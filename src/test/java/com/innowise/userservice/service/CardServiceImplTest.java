@@ -9,6 +9,7 @@ import com.innowise.userservice.model.dto.card.CardUpdateDto;
 import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
+import com.innowise.userservice.service.impl.CardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +60,6 @@ class CardServiceImplTest {
     @Test
     void create() {
         CardCreateDto dto = new CardCreateDto();
-        dto.setUserId(USER_ID);
         dto.setNumber("1111111111111111");
         dto.setHolder("Ivan");
         dto.setExpirationDate(LocalDate.now());
@@ -75,7 +75,7 @@ class CardServiceImplTest {
         when(cardRepository.countAllByUserId(user.getId())).thenReturn(0);
         when(cardRepository.findCardNumber("1111111111111111")).thenReturn(null);
         when(cardRepository.save(any(Card.class))).thenAnswer(i -> i.getArgument(0));
-        Card result = cardService.create(dto);
+        Card result = cardService.create(USER_ID,dto);
         assertNotNull(result);
         assertEquals("Ivan", result.getNumber());
         assertEquals(user, result.getUser());
@@ -85,10 +85,9 @@ class CardServiceImplTest {
         CardCreateDto dto = new CardCreateDto();
         User user = new User();
         user.setId(USER_ID);
-        dto.setUserId(USER_ID);
         when(userService.findById(USER_ID)).thenReturn(user);
         when(cardRepository.countAllByUserId(USER_ID)).thenReturn(5);
-        assertThrows(LimitCardException.class, () -> cardService.create(dto));
+        assertThrows(LimitCardException.class, () -> cardService.create(USER_ID,dto));
         verify(cardRepository, never()).save(any());
     }
     @Test
@@ -99,10 +98,9 @@ class CardServiceImplTest {
         card.setNumber("1111");
         CardCreateDto dto = new CardCreateDto();
         dto.setNumber("1111");
-        dto.setUserId(USER_ID);
         when(userService.findById(USER_ID)).thenReturn(user);
         when(cardRepository.findCardNumber("1111")).thenReturn("1111");
-        assertThrows(DuplicateCardNumberException.class, ()-> cardService.create(dto));
+        assertThrows(DuplicateCardNumberException.class, ()-> cardService.create(USER_ID,dto));
     }
 
 

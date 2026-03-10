@@ -1,14 +1,16 @@
-package com.innowise.userservice.service;
+package com.innowise.userservice.service.impl;
 
 
 import com.innowise.userservice.exception.DuplicateEmailException;
 import com.innowise.userservice.exception.UserNotFoundException;
 import com.innowise.userservice.mapper.UserMapper;
 import com.innowise.userservice.model.dto.user.UserCreateDto;
+import com.innowise.userservice.model.dto.user.UserResponseDto;
 import com.innowise.userservice.model.dto.user.UserStatusDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
+import com.innowise.userservice.service.UserService;
 import com.innowise.userservice.specification.UserSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,6 +58,7 @@ public class UserServiceImpl implements UserService {
         return save;
     }
 
+
     @Override
     @Transactional
     public User findById(Long id) {
@@ -67,6 +70,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         userRedisTemplate.opsForValue().set(cacheKey,user,CACHE_TTL_MINUTES, TimeUnit.MINUTES);
         return user;
+    }
+
+    @Override
+    public UserResponseDto findByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        return userMapper.toUserResponseDto(user);
     }
 
     @Override

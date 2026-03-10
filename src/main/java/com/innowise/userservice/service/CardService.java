@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CardService {
-    Card create(CardCreateDto cardCreateDto);
+    Card create(Long userId,CardCreateDto cardCreateDto);
     Card findById(Long id);
 
     Page<Card> findAllCard(Pageable pageable);

@@ -9,6 +9,7 @@ import com.innowise.userservice.model.dto.user.UserStatusDto;
 import com.innowise.userservice.model.dto.user.UserUpdateDto;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.UserRepository;
+import com.innowise.userservice.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

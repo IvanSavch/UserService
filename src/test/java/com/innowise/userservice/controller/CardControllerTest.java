@@ -9,17 +9,20 @@ import com.innowise.userservice.model.entity.Card;
 import com.innowise.userservice.model.entity.User;
 import com.innowise.userservice.repository.CardRepository;
 import com.innowise.userservice.repository.UserRepository;
-import com.jayway.jsonpath.JsonPath;
+import com.innowise.userservice.service.impl.AuthenticationServiceImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.GenericContainer;
@@ -31,6 +34,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -44,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+
 class CardControllerTest {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres")
@@ -79,12 +85,15 @@ class CardControllerTest {
     private  CardRepository cardRepository;
     @Autowired
     private  UserRepository userRepository;
+    @MockitoBean(name = "authenticationServiceImpl")
+    private AuthenticationServiceImpl authenticationServiceImpl;
     private static User testUser;
     private static Card testCard;
 
     @BeforeAll
      void  setUp() {
         testUser = new User();
+        testUser.setId(1L);
         testUser.setName("Ivan");
         testUser.setSurname("Sauchanka");
         testUser.setEmail("ivan@mail.com");
@@ -99,7 +108,11 @@ class CardControllerTest {
         testCard.setUser(testUser);
         cardRepository.save(testCard);
     }
-
+    @BeforeEach
+    void setupAdminRole() {
+        doAnswer(invocation -> true
+        ).when(authenticationServiceImpl).adminRole(any());
+    }
     @AfterAll
      void tearDown() {
 
@@ -108,36 +121,23 @@ class CardControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void createCard() {
         UserCreateDto userCreateDto = new UserCreateDto();
+        userCreateDto.setId(1L);
         userCreateDto.setSurname("Sauchanka");
         userCreateDto.setBirthDate(LocalDate.now());
         userCreateDto.setName("Ivan");
         userCreateDto.setEmail("i@mail.com");
 
-        String userResponse;
-        try {
-            userResponse = mockMvc.perform(post("/users")
-                            .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(userCreateDto)))
-                    .andExpect(status().isCreated())
-                    .andReturn()
-                    .getResponse()
-                    .getContentAsString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        Long userId = JsonPath.parse(userResponse).read("$.id", Long.class);
-
         CardCreateDto cardDto = new CardCreateDto();
-        cardDto.setUserId(userId);
         cardDto.setNumber("9234123412341234");
         cardDto.setHolder("Ivan");
         cardDto.setExpirationDate(LocalDate.now());
         cardDto.setActive(true);
 
         try {
-            mockMvc.perform(post("/cards")
+            mockMvc.perform(post("/cards/{id}/users",userCreateDto.getId())
                             .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(cardDto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.number").value("9234123412341234"));
@@ -147,6 +147,7 @@ class CardControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void updateCard() throws Exception {
         CardUpdateDto cardUpdateDto = new CardUpdateDto();
         cardUpdateDto.setHolder("new holder");
@@ -165,6 +166,7 @@ class CardControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void findById() throws Exception {
 
         mockMvc.perform(get("/cards/{id}", testCard.getId()))
@@ -173,6 +175,7 @@ class CardControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void findAll() throws Exception {
         Card card1 = new Card();
         card1.setUser(testUser);
@@ -183,7 +186,7 @@ class CardControllerTest {
 
         cardRepository.save(card1);
 
-        mockMvc.perform(get("/cards").param("page", "0"))
+        mockMvc.perform(get("/cards/").param("page", "0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*").isArray())
                 .andExpect(jsonPath("$.length()").value(2))
@@ -192,6 +195,7 @@ class CardControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "ivan@mail.com")
     void findAllByUserId() throws Exception {
         mockMvc.perform(get("/cards/users/{id}", testCard.getUser().getId()))
                 .andExpect(status().isOk())
@@ -199,6 +203,7 @@ class CardControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void setStatus() throws Exception {
         Long cardId = testCard.getId();
         CardStatusDto statusDto = new CardStatusDto();
@@ -212,6 +217,7 @@ class CardControllerTest {
 
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deleteCard() throws Exception {
 
         mockMvc.perform(delete("/cards/{id}", testCard.getId())).andExpect(status().isNoContent());

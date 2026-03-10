@@ -4,28 +4,27 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: my-api
+    container_name: user_service
     depends_on:
       - postgres
       - redis
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=root
-      - SPRING_REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - SPRING_DATASOURCE_URL=${DB_URL_USR}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     ports:
-      - "80:8080"
+      - "8081:8081"
 
   postgres:
     image: postgres
-    container_name: postgres
+    container_name: user_db
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=postgres
-
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
   redis:
     image: redis
     container_name: redis
